@@ -15,6 +15,7 @@ import (
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/urfave/cli/v2"
+	"golang.org/x/net/html/charset"
 )
 
 //このコードでは、`urfave/cli/v2`ライブラリを使用してコマンドラインオプションを定義し、`Action`関数で処理を実行しています。このライブラリを使用することで、コマンドラインオプションの定義が簡潔になり、エラーチェックやヘルプメッセージの生成などが自動化されます。
@@ -144,7 +145,20 @@ func main() {
 
 			fmt.Printf("Target: %s\n", url)
 
-			doc, err := goquery.NewDocument(url)
+			resp, err := http.Get(url)
+			if err != nil {
+				log.Fatalf("http error: %s", err.Error())
+			}
+			defer resp.Body.Close()
+
+			utf8Reader, err := charset.NewReader(resp.Body, resp.Header.Get("Content-Type"))
+			if err != nil {
+				log.Fatalf("encoding error: %s", err.Error())
+			}
+
+			//utf-8以外も文字化けしない様にする
+			doc, err := goquery.NewDocumentFromReader(utf8Reader)
+			//doc, err := goquery.NewDocument(url)
 			if err != nil {
 				log.Fatalf("goquery error: %s", err.Error())
 			}
