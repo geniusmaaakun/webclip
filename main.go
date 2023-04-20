@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 	"webclip/src/downloader"
+	"webclip/src/server/models"
 	"webclip/src/wcconverter"
 
 	"github.com/PuerkitoBio/goquery"
@@ -21,6 +22,10 @@ import (
 //上記のコードでは、`HTMLToMarkdownConverter`と`ImageDownloader`という構造体を使用して、処理を行っています。これにより、コードがより構造化され、プロのエンジニアが書いたようなスタイルになっています。
 
 func main() {
+	_, err := models.NewDB()
+	if err != nil {
+		log.Fatal(err)
+	}
 	app := &cli.App{
 		Name:  "HTML to Markdown converter",
 		Usage: "Convert HTML files to Markdown with optional image downloading",
@@ -128,7 +133,7 @@ func main() {
 		},
 	}
 
-	err := app.Run(os.Args)
+	err = app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}
