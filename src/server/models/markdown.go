@@ -3,11 +3,11 @@ package models
 import "database/sql"
 
 type MarkdownRepo struct {
-	Db *sql.DB
+	db *sql.DB
 }
 
 func NewMarkdownRepo(db *sql.DB) *MarkdownRepo {
-	return &MarkdownRepo{Db: db}
+	return &MarkdownRepo{db: db}
 }
 
 type MarkdownMemo struct {
@@ -22,7 +22,7 @@ func NewMarkdownMemo(title, path, srsUrl string) *MarkdownMemo {
 }
 
 func (m *MarkdownRepo) Create(md *MarkdownMemo) error {
-	_, err := m.Db.Exec("INSERT INTO markdown_memo (title, path, src_url) VALUES (?, ?, ?)", md.Title, md.Path, md.SrcUrl)
+	_, err := m.db.Exec("INSERT INTO markdown_memo (title, path, src_url) VALUES (?, ?, ?)", md.Title, md.Path, md.SrcUrl)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func (m *MarkdownRepo) Create(md *MarkdownMemo) error {
 }
 
 func (m *MarkdownRepo) Delete(md *MarkdownMemo) error {
-	_, err := m.Db.Exec("DELETE FROM markdown_memo WHERE id = ?", md.Id)
+	_, err := m.db.Exec("DELETE FROM markdown_memo WHERE id = ?", md.Id)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (m *MarkdownRepo) Delete(md *MarkdownMemo) error {
 }
 
 func (m *MarkdownRepo) Update(md *MarkdownMemo) error {
-	_, err := m.Db.Exec("UPDATE markdown_memo SET title = ?, path = ?, src_url = ? WHERE id = ?", md.Title, md.Path, md.SrcUrl, md.Id)
+	_, err := m.db.Exec("UPDATE markdown_memo SET title = ?, path = ?, src_url = ? WHERE id = ?", md.Title, md.Path, md.SrcUrl, md.Id)
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (m *MarkdownRepo) Update(md *MarkdownMemo) error {
 }
 
 func (m *MarkdownRepo) FindById(id int) (*MarkdownMemo, error) {
-	row := m.Db.QueryRow("SELECT * FROM markdown_memo WHERE id = ?", id)
+	row := m.db.QueryRow("SELECT * FROM markdown_memo WHERE id = ?", id)
 	md := &MarkdownMemo{}
 	err := row.Scan(&md.Id, &md.Title, &md.Path, &md.SrcUrl)
 	if err != nil {
@@ -56,7 +56,7 @@ func (m *MarkdownRepo) FindById(id int) (*MarkdownMemo, error) {
 }
 
 func (m *MarkdownRepo) FindAll() ([]*MarkdownMemo, error) {
-	rows, err := m.Db.Query("SELECT * FROM markdown_memo")
+	rows, err := m.db.Query("SELECT * FROM markdown_memo")
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (m *MarkdownRepo) FindAll() ([]*MarkdownMemo, error) {
 }
 
 func (m *MarkdownRepo) FindByTitle(title string) ([]*MarkdownMemo, error) {
-	rows, err := m.Db.Query("SELECT * FROM markdown_memo WHERE title = ?", title)
+	rows, err := m.db.Query("SELECT * FROM markdown_memo WHERE title = ?", title)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +93,7 @@ func (m *MarkdownRepo) FindByTitle(title string) ([]*MarkdownMemo, error) {
 
 //
 func (m *MarkdownRepo) FindByPath(path string) ([]*MarkdownMemo, error) {
-	rows, err := m.Db.Query("SELECT * FROM markdown_memo WHERE path = ?", path)
+	rows, err := m.db.Query("SELECT * FROM markdown_memo WHERE path = ?", path)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (m *MarkdownRepo) FindByPath(path string) ([]*MarkdownMemo, error) {
 
 //test用
 func (m MarkdownRepo) FindByTitleLastOne(title string) (*MarkdownMemo, error) {
-	rows, err := m.Db.Query("SELECT * FROM markdown_memo WHERE title = ? ORDER BY id DESC LIMIT 1", title)
+	rows, err := m.db.Query("SELECT * FROM markdown_memo WHERE title = ? ORDER BY id DESC LIMIT 1", title)
 	if err != nil {
 		return nil, err
 	}
