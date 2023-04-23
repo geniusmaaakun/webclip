@@ -22,7 +22,7 @@ type MarkdownMemo struct {
 }
 
 func NewMarkdownMemo(title, path, srsUrl string) *MarkdownMemo {
-	return &MarkdownMemo{Title: path, Path: path, SrcUrl: srsUrl, CreatedAt: time.Now()}
+	return &MarkdownMemo{Title: title, Path: path, SrcUrl: srsUrl, CreatedAt: time.Now()}
 }
 
 func (m *MarkdownRepo) Create(md *MarkdownMemo) error {

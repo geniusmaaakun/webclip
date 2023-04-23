@@ -20,7 +20,7 @@ func NewDB() (*sql.DB, error) {
 	query := `CREATE TABLE IF NOT EXISTS markdown_memo (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title String,
-		path String,
+		path String UNIQUE,
 		src_url String,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`
 

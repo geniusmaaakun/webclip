@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"webclip/src/server/models"
 	"webclip/src/wcconverter"
 	"webclip/src/wcdownloader"
@@ -24,16 +25,16 @@ func main() {
 		Usage: "Convert HTML files to Markdown with optional image downloading",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:     "url",
-				Aliases:  []string{"u"},
-				Usage:    "Target URL",
-				Required: true,
+				Name:    "url",
+				Aliases: []string{"u"},
+				Usage:   "Target URL",
+				//Required: true,
 			},
 			&cli.StringFlag{
-				Name:     "outdir",
-				Aliases:  []string{"o"},
-				Usage:    "Output directory",
-				Required: true,
+				Name:    "outdir",
+				Aliases: []string{"o"},
+				Usage:   "Output directory",
+				//Required: true,
 			},
 			&cli.BoolFlag{
 				Name:    "download",
@@ -48,6 +49,11 @@ func main() {
 			url := c.String("url")
 			outdir := c.String("outdir")
 			imageDownloadFlag := c.Bool("download")
+
+			if (outdir == "") || (url == "") {
+				log.Println("Invalid arguments, usage: webclip -u <url> -o <outdir> [-d]")
+				log.Fatal("more info: webclip -h")
+			}
 
 			err := os.MkdirAll(outdir, 0755)
 			if err != nil {
@@ -76,7 +82,35 @@ func main() {
 				log.Fatalf("Markdown Conversion Error: %s", err.Error())
 			}
 
+			db, err := models.NewDB()
+			repo := models.NewMarkdownRepo(db)
+			absPath, err := filepath.Abs(filepath.Join(outdir, "README.md"))
+			if err != nil {
+				log.Fatalf("SaveDatabase: %v\n", err)
+			}
+			mdData := models.NewMarkdownMemo(outdir, absPath, url)
+			err = repo.Create(mdData)
+			if err != nil {
+				log.Fatalf("SaveDatabase: %v\n", err)
+			}
+
 			return nil
+		},
+	}
+
+	//sub command : webclip serverd
+	app.Commands = []*cli.Command{
+		{
+			Name:  "server",
+			Usage: "Start Web Server",
+			Action: func(c *cli.Context) error {
+				//コマンド入力待機
+				//search 特定の文字列を検索
+				//clear ファイルパスが存在しない場合削除
+				//list ファイルパスを表示
+				fmt.Println("Start Web Server")
+				return nil
+			},
 		},
 	}
 

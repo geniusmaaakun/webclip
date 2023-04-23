@@ -1,10 +1,8 @@
 package wcconverter
 
 import (
-	"log"
 	"os"
 	"path/filepath"
-	"webclip/src/server/models"
 
 	md "github.com/JohannesKaufmann/html-to-markdown"
 	"github.com/PuerkitoBio/goquery"
@@ -14,19 +12,13 @@ type HTMLToMarkdownConverter struct {
 	OutputDir string
 	FileName  string
 	Options   *md.Options
-	repo      *models.MarkdownRepo
 }
 
 func NewConverter(outputDir string, filename string, op *md.Options) *HTMLToMarkdownConverter {
-	db, err := models.NewDB()
-	if err != nil {
-		log.Fatal(err)
-	}
 	return &HTMLToMarkdownConverter{
 		OutputDir: outputDir,
 		FileName:  filename,
 		Options:   op,
-		repo:      models.NewMarkdownRepo(db),
 	}
 }
 
