@@ -21,6 +21,9 @@ import (
 //このコードでは、`urfave/cli/v2`ライブラリを使用してコマンドラインオプションを定義し、`Action`関数で処理を実行しています。このライブラリを使用することで、コマンドラインオプションの定義が簡潔になり、エラーチェックやヘルプメッセージの生成などが自動化されます。
 //上記のコードでは、`HTMLToMarkdownConverter`と`ImageDownloader`という構造体を使用して、処理を行っています。これにより、コードがより構造化され、プロのエンジニアが書いたようなスタイルになっています。
 
+type App struct {
+}
+
 func main() {
 	_, err := models.NewDB()
 	if err != nil {
@@ -50,6 +53,8 @@ func main() {
 		},
 		//WebClip
 		Action: func(c *cli.Context) error {
+			//1 setup main
+			//コマンドラインオプションの値を取得
 			url := c.String("url")
 			outdir := c.String("outdir")
 			imageDownloadFlag := c.Bool("download")
@@ -61,6 +66,8 @@ func main() {
 
 			fmt.Printf("Target: %s\n", url)
 
+			//大元にdownloaderを作成 子にimageDownloaderとhtmldownloaderを作成
+			//2 HTMLを取得 html downloader
 			resp, err := http.Get(url)
 			if err != nil {
 				log.Fatalf("http error: %s", err.Error())
@@ -79,6 +86,7 @@ func main() {
 				log.Fatalf("goquery error: %s", err.Error())
 			}
 
+			//option?
 			imageDownloader := &downloader.ImageDownloader{
 				OutputDir: outdir,
 				Client: &http.Client{
@@ -86,6 +94,7 @@ func main() {
 				},
 			}
 
+			//3 HTMLをMarkdownに変換
 			if imageDownloadFlag {
 				doc.Find("img").Each(func(i int, s *goquery.Selection) {
 					imgURL, exists := s.Attr("src")
@@ -119,6 +128,7 @@ func main() {
 				log.Fatalf("Markdown Conversion Error: %s", err.Error())
 			}
 
+			//4 Markdownをファイルに保存
 			file, err := os.Create(filepath.Join(outdir, "README.md"))
 			if err != nil {
 				log.Fatalf("File Create Error: %s\n", err.Error())

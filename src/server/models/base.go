@@ -21,7 +21,8 @@ func NewDB() (*sql.DB, error) {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title String,
 		path String,
-		src_url String)`
+		src_url String,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP)`
 
 	//実行 結果は返ってこない為、_にする
 	_, err = db.Exec(query)

@@ -1,6 +1,9 @@
 package models
 
-import "database/sql"
+import (
+	"database/sql"
+	"time"
+)
 
 type MarkdownRepo struct {
 	db *sql.DB
@@ -11,18 +14,19 @@ func NewMarkdownRepo(db *sql.DB) *MarkdownRepo {
 }
 
 type MarkdownMemo struct {
-	Id     int
-	Title  string
-	Path   string
-	SrcUrl string
+	Id        int
+	Title     string
+	Path      string
+	SrcUrl    string
+	CreatedAt time.Time
 }
 
 func NewMarkdownMemo(title, path, srsUrl string) *MarkdownMemo {
-	return &MarkdownMemo{Title: path, Path: path, SrcUrl: srsUrl}
+	return &MarkdownMemo{Title: path, Path: path, SrcUrl: srsUrl, CreatedAt: time.Now()}
 }
 
 func (m *MarkdownRepo) Create(md *MarkdownMemo) error {
-	_, err := m.db.Exec("INSERT INTO markdown_memo (title, path, src_url) VALUES (?, ?, ?)", md.Title, md.Path, md.SrcUrl)
+	_, err := m.db.Exec("INSERT INTO markdown_memo (title, path, src_url, created_at) VALUES (?, ?, ?, ?)", md.Title, md.Path, md.SrcUrl, md.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -31,6 +35,14 @@ func (m *MarkdownRepo) Create(md *MarkdownMemo) error {
 
 func (m *MarkdownRepo) Delete(md *MarkdownMemo) error {
 	_, err := m.db.Exec("DELETE FROM markdown_memo WHERE id = ?", md.Id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MarkdownRepo) DeleteByTitle(md *MarkdownMemo) error {
+	_, err := m.db.Exec("DELETE FROM markdown_memo WHERE title = ?", md.Title)
 	if err != nil {
 		return err
 	}
@@ -48,7 +60,7 @@ func (m *MarkdownRepo) Update(md *MarkdownMemo) error {
 func (m *MarkdownRepo) FindById(id int) (*MarkdownMemo, error) {
 	row := m.db.QueryRow("SELECT * FROM markdown_memo WHERE id = ?", id)
 	md := &MarkdownMemo{}
-	err := row.Scan(&md.Id, &md.Title, &md.Path, &md.SrcUrl)
+	err := row.Scan(&md.Id, &md.Title, &md.Path, &md.SrcUrl, &md.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +76,7 @@ func (m *MarkdownRepo) FindAll() ([]*MarkdownMemo, error) {
 	memos := []*MarkdownMemo{}
 	for rows.Next() {
 		memo := &MarkdownMemo{}
-		err := rows.Scan(&memo.Id, &memo.Title, &memo.Path, &memo.SrcUrl)
+		err := rows.Scan(&memo.Id, &memo.Title, &memo.Path, &memo.SrcUrl, &memo.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +94,7 @@ func (m *MarkdownRepo) FindByTitle(title string) ([]*MarkdownMemo, error) {
 	memos := []*MarkdownMemo{}
 	for rows.Next() {
 		memo := &MarkdownMemo{}
-		err := rows.Scan(&memo.Id, &memo.Title, &memo.Path, &memo.SrcUrl)
+		err := rows.Scan(&memo.Id, &memo.Title, &memo.Path, &memo.SrcUrl, &memo.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +113,7 @@ func (m *MarkdownRepo) FindByPath(path string) ([]*MarkdownMemo, error) {
 	memos := []*MarkdownMemo{}
 	for rows.Next() {
 		memo := &MarkdownMemo{}
-		err := rows.Scan(&memo.Id, &memo.Title, &memo.Path, &memo.SrcUrl)
+		err := rows.Scan(&memo.Id, &memo.Title, &memo.Path, &memo.SrcUrl, &memo.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -119,7 +131,7 @@ func (m MarkdownRepo) FindByTitleLastOne(title string) (*MarkdownMemo, error) {
 	defer rows.Close()
 	for rows.Next() {
 		md := &MarkdownMemo{}
-		err := rows.Scan(&md.Id, &md.Title, &md.Path, &md.SrcUrl)
+		err := rows.Scan(&md.Id, &md.Title, &md.Path, &md.SrcUrl, &md.CreatedAt)
 		if err != nil {
 			return nil, err
 		}

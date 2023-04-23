@@ -77,5 +77,23 @@ imgタグを見つけたらダウンロード、置き換え
 # ブラウザで表示　再度html 
     データは最初にすべて取得ブラウザ表示。
     順次取得の方がパフォーマンス上がる？
-    
+
 # アプリでも見れる。  flutter
+
+
+
+
+# 構造
+App
+downloader
+    imageDownloader
+    htmlDownloader
+
+converter
+    toMarkdown()
+    mdSave()
+
+repo
+
+
+
