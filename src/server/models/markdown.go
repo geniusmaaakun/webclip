@@ -58,9 +58,14 @@ func (m *MarkdownRepo) Update(md *MarkdownMemo) error {
 }
 
 func (m *MarkdownRepo) FindById(id int) (*MarkdownMemo, error) {
-	row := m.db.QueryRow("SELECT * FROM markdown_memo WHERE id = ?", id)
+	//prepareをすべてで使う
+	stmt, err := m.db.Prepare("SELECT * FROM markdown_memo WHERE id = ?")
+	if err != nil {
+		return nil, err
+	}
+	row := stmt.QueryRow(id)
 	md := &MarkdownMemo{}
-	err := row.Scan(&md.Id, &md.Title, &md.Path, &md.SrcUrl, &md.CreatedAt)
+	err = row.Scan(&md.Id, &md.Title, &md.Path, &md.SrcUrl, &md.CreatedAt)
 	if err != nil {
 		return nil, err
 	}

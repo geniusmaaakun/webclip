@@ -24,10 +24,13 @@ func NewServer(host, port string, db *sql.DB) *Server {
 //gorilla/muxを使ってルーティングを設定する
 func (s *Server) Run() error {
 	router := mux.NewRouter().StrictSlash(true) //末尾/を許可しない
+	//Corsを許可する
 	router.Use(s.enableCORS)
+
 	//Reactのhtmlを返す
 	//router.HandleFunc("/api/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
 	router.HandleFunc("/api/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
+	router.HandleFunc("/api/markdowns/{id}", s.MarkdownHandler.GetById).Methods("GET")
 
 	err := http.ListenAndServe(s.Host+":"+s.Port, router)
 	return err
