@@ -14,11 +14,11 @@ func NewMarkdownRepo(db *sql.DB) *MarkdownRepo {
 }
 
 type MarkdownMemo struct {
-	Id        int
-	Title     string
-	Path      string
-	SrcUrl    string
-	CreatedAt time.Time
+	Id        int       `json:"id"`
+	Title     string    `json:"title"`
+	Path      string    `json:"path"`
+	SrcUrl    string    `json:"src_url"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 func NewMarkdownMemo(title, path, srsUrl string) *MarkdownMemo {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"webclip/src/server/controllers"
 	"webclip/src/server/models"
 	"webclip/src/wcconverter"
 	"webclip/src/wcdownloader"
@@ -41,6 +42,11 @@ func main() {
 				Aliases: []string{"d"},
 				Usage:   "Download images",
 			},
+			&cli.BoolFlag{
+				Name:    "db",
+				Aliases: []string{"save"},
+				Usage:   "Save to DB",
+			},
 		},
 		//WebClip
 		Action: func(c *cli.Context) error {
@@ -62,6 +68,7 @@ func main() {
 
 			fmt.Printf("Target: %s\n", url)
 
+			//download
 			downloader := wcdownloader.NewDownloader(url, outdir, imageDownloadFlag)
 			doc, err := downloader.HtmlDownloader.CreateDocument()
 			if err != nil {
@@ -72,6 +79,7 @@ func main() {
 				log.Fatalf("replace Document(): %s", err.Error())
 			}
 
+			//convert
 			converter := wcconverter.NewConverter(outdir, "README.md", nil)
 			markdown, err := converter.Convert(doc.Selection)
 			if err != nil {
@@ -82,19 +90,25 @@ func main() {
 				log.Fatalf("Markdown Conversion Error: %s", err.Error())
 			}
 
-			db, err := models.NewDB()
-			repo := models.NewMarkdownRepo(db)
-			absPath, err := filepath.Abs(filepath.Join(outdir, "README.md"))
-			if err != nil {
-				log.Fatalf("SaveDatabase: %v\n", err)
+			//save to DB
+			if c.Bool("save") {
+				db, err := models.NewDB()
+				if err != nil {
+					log.Fatalf("SaveDatabase: %v\n", err)
+				}
+				repo := models.NewMarkdownRepo(db)
+				absPath, err := filepath.Abs(filepath.Join(outdir, "README.md"))
+				if err != nil {
+					log.Fatalf("SaveDatabase: %v\n", err)
+				}
+				mdData := models.NewMarkdownMemo(outdir, absPath, url)
+				err = repo.Create(mdData)
+				if err != nil {
+					log.Fatalf("SaveDatabase: %v\n", err)
+				}
 			}
-			mdData := models.NewMarkdownMemo(outdir, absPath, url)
-			err = repo.Create(mdData)
-			if err != nil {
-				log.Fatalf("SaveDatabase: %v\n", err)
-			}
-
 			return nil
+
 		},
 	}
 
@@ -109,6 +123,12 @@ func main() {
 				//clear ファイルパスが存在しない場合削除
 				//list ファイルパスを表示
 				fmt.Println("Start Web Server")
+				db, err := models.NewDB()
+				if err != nil {
+					log.Fatalf("SaveDatabase: %v\n", err)
+				}
+				srv := controllers.NewServer("localhost", "8080", db)
+				srv.Run()
 				return nil
 			},
 		},

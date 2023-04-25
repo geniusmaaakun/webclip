@@ -3,7 +3,6 @@ package models_test
 import (
 	"os"
 	"testing"
-	"webclip/src/server/controllers"
 	"webclip/src/server/models"
 )
 
@@ -28,7 +27,8 @@ func TestCreateMd(t *testing.T) {
 	if err != nil {
 		return
 	}
-	srv := controllers.NewServer("localhost", "8080", db)
+
+	MarkdownRepo := models.NewMarkdownRepo(db)
 
 	type args struct {
 		title  string
@@ -55,11 +55,11 @@ func TestCreateMd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			md := models.NewMarkdownMemo(tt.args.title, tt.args.path, tt.args.srcURL)
-			err = srv.MarkdownRepo.Create(md)
+			err = MarkdownRepo.Create(md)
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, err := srv.MarkdownRepo.FindByTitleLastOne(md.Title)
+			got, err := MarkdownRepo.FindByTitleLastOne(md.Title)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -75,7 +75,7 @@ func TestDeleteMd(t *testing.T) {
 	if err != nil {
 		return
 	}
-	srv := controllers.NewServer("localhost", "8080", db)
+	MarkdownRepo := models.NewMarkdownRepo(db)
 
 	type args struct {
 		title  string
@@ -102,15 +102,15 @@ func TestDeleteMd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			md := models.NewMarkdownMemo(tt.args.title, tt.args.path, tt.args.srcURL)
-			err = srv.MarkdownRepo.Create(md)
+			err = MarkdownRepo.Create(md)
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = srv.MarkdownRepo.DeleteByTitle(md)
+			err = MarkdownRepo.DeleteByTitle(md)
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, err := srv.MarkdownRepo.FindByTitleLastOne(md.Title)
+			got, err := MarkdownRepo.FindByTitleLastOne(md.Title)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -127,7 +127,7 @@ func TestUpdateMd(t *testing.T) {
 	if err != nil {
 		return
 	}
-	srv := controllers.NewServer("localhost", "8080", db)
+	MarkdownRepo := models.NewMarkdownRepo(db)
 
 	type args struct {
 		title  string
@@ -154,12 +154,12 @@ func TestUpdateMd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			md := models.NewMarkdownMemo(tt.args.title, tt.args.path, tt.args.srcURL)
-			err = srv.MarkdownRepo.Create(md)
+			err = MarkdownRepo.Create(md)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			updateMd, err := srv.MarkdownRepo.FindByTitleLastOne(md.Title)
+			updateMd, err := MarkdownRepo.FindByTitleLastOne(md.Title)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -167,9 +167,9 @@ func TestUpdateMd(t *testing.T) {
 			updateMd.SrcUrl = "srcupdate"
 			updateMd.Path = "pathupdate"
 
-			err = srv.MarkdownRepo.Update(updateMd)
+			err = MarkdownRepo.Update(updateMd)
 
-			got, err := srv.MarkdownRepo.FindByTitleLastOne(updateMd.Title)
+			got, err := MarkdownRepo.FindByTitleLastOne(updateMd.Title)
 			if err != nil {
 				t.Fatal(err)
 			}

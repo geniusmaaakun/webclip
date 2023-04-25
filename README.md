@@ -96,4 +96,27 @@ converter
 repo
 
 
+# APIを作成 gollira/mux
 
+# React
+やりたいこと
+テスト、Ts
+
+## プロジェクトの作成
+npx create-react-app frontend --template typescript
+
+テキストボックス
+入力をuseStateで管理
+入力ボックスに入力しエンターを押したアラaxiosでデータを取得開始
+useStateで結果を配列に入れて、表示
+
+
+
+サーチバー
+親コンポーネントからステートを受け取る。更新関数
+
+結果のボックス
+ステートの中身をリスト表示
+
+
+テスト
