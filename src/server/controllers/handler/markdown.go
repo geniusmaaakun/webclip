@@ -21,6 +21,33 @@ type MarkdownMemo struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+func (m *MarkdownMemo) ConvertTo() models.MarkdownMemo {
+	return models.MarkdownMemo{Id: m.Id, Title: m.Title, Path: m.Path, SrcUrl: m.SrcUrl, CreatedAt: m.CreatedAt}
+}
+
+func (m *MarkdownMemo) ConvertFrom(md *models.MarkdownMemo) error {
+	//中身を取得して格納
+	file, err := os.Open(md.Path)
+	if err != nil {
+		//独自エラーを返す
+		return err
+	}
+	defer file.Close()
+	content, err := io.ReadAll(file)
+	if err != nil {
+		//独自エラーを返す
+		return err
+	}
+
+	m.Id = md.Id
+	m.Title = md.Title
+	m.Content = string(content)
+	m.Path = md.Path
+	m.SrcUrl = md.SrcUrl
+	m.CreatedAt = md.CreatedAt
+	return nil
+}
+
 type MarkdownHandler struct {
 	MarkdownRepo *models.MarkdownRepo
 }
@@ -79,28 +106,8 @@ func (h *MarkdownHandler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//中身を取得して格納
-	file, err := os.Open(md.Path)
-	if err != nil {
-		//独自エラーを返す
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer file.Close()
-	content, err := io.ReadAll(file)
-	if err != nil {
-		//独自エラーを返す
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	markdown := MarkdownMemo{
-		Id:        md.Id,
-		Title:     md.Title,
-		Content:   string(content),
-		Path:      md.Path,
-		SrcUrl:    md.SrcUrl,
-		CreatedAt: md.CreatedAt,
-	}
+	markdown := &MarkdownMemo{}
+	markdown.ConvertFrom(md)
 
 	//jsonで返す
 	jsonData, err := json.Marshal(markdown)

@@ -49,6 +49,15 @@ func (m *MarkdownRepo) DeleteByTitle(md *MarkdownMemo) error {
 	return nil
 }
 
+//cleanコマンドで削除する
+func (m *MarkdownRepo) DeleteByPath(md *MarkdownMemo) error {
+	_, err := m.db.Exec("DELETE FROM markdown_memo WHERE path = ?", md.Path)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (m *MarkdownRepo) Update(md *MarkdownMemo) error {
 	_, err := m.db.Exec("UPDATE markdown_memo SET title = ?, path = ?, src_url = ? WHERE id = ?", md.Title, md.Path, md.SrcUrl, md.Id)
 	if err != nil {
@@ -143,4 +152,26 @@ func (m MarkdownRepo) FindByTitleLastOne(title string) (*MarkdownMemo, error) {
 		return md, nil
 	}
 	return nil, nil
+}
+
+func (m MarkdownRepo) SearchByTitle(title string) ([]*MarkdownMemo, error) {
+	stmt, err := m.db.Prepare("SELECT * FROM markdown_memo WHERE title LIKE ?")
+	if err != nil {
+		return nil, err
+	}
+	rows, err := stmt.Query("%" + title + "%")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	memos := []*MarkdownMemo{}
+	for rows.Next() {
+		memo := &MarkdownMemo{}
+		err := rows.Scan(&memo.Id, &memo.Title, &memo.Path, &memo.SrcUrl, &memo.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		memos = append(memos, memo)
+	}
+	return memos, nil
 }

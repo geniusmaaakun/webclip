@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"webclip/src/server/controllers"
 	"webclip/src/server/models"
+	"webclip/src/server/usecases"
 	"webclip/src/wcconverter"
 	"webclip/src/wcdownloader"
 
@@ -85,6 +86,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Markdown Conversion Error: %s", err.Error())
 			}
+			markdown = converter.AddSrcUrlToMarkdown(url, markdown)
 			err = converter.SaveToFile(markdown)
 			if err != nil {
 				log.Fatalf("Markdown Conversion Error: %s", err.Error())
@@ -112,8 +114,8 @@ func main() {
 		},
 	}
 
-	//sub command : webclip serverd
 	app.Commands = []*cli.Command{
+		//sub command : webclip server
 		{
 			Name:  "server",
 			Usage: "Start Web Server",
@@ -123,15 +125,145 @@ func main() {
 				//clear ファイルパスが存在しない場合削除
 				//list ファイルパスを表示
 				fmt.Println("Start Web Server")
+				//create db
 				db, err := models.NewDB()
 				if err != nil {
 					log.Fatalf("SaveDatabase: %v\n", err)
 				}
+				//create usecase
+				//create handler
 				srv := controllers.NewServer("localhost", "8080", db)
 				srv.Run()
 				return nil
 			},
 		},
+		//sub command : webclip clean
+		{
+			Name:  "clean",
+			Usage: "clean database if file is not exist",
+			Action: func(c *cli.Context) error {
+				db, err := models.NewDB()
+				if err != nil {
+					log.Fatalf("CleanDatabase: %v\n", err)
+				}
+				markdownRepo := models.NewMarkdownRepo(db)
+				markdownUsecase := usecases.NewMarkdownInteractor(markdownRepo)
+				err = markdownUsecase.DeleteIfNotExistsByPath()
+				if err != nil {
+					log.Fatalf("CleanDatabase: %v\n", err)
+				}
+
+				return nil
+			},
+		},
+
+		{
+			Name:  "search",
+			Usage: "search markdown file",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "title",
+					Aliases: []string{"t"},
+					Usage:   "search title",
+				},
+				&cli.StringFlag{
+					Name:    "body",
+					Aliases: []string{"b"},
+					Usage:   "search body",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				title := c.String("title")
+				body := c.String("body")
+				if title == "" && body == "" {
+					log.Fatal("title or body is required")
+					return nil
+				}
+
+				db, err := models.NewDB()
+				if err != nil {
+					log.Fatalf("SearchDatabase: %v\n", err)
+				}
+				markdownRepo := models.NewMarkdownRepo(db)
+				markdownUsecase := usecases.NewMarkdownInteractor(markdownRepo)
+
+				if title != "" && body != "" {
+					//find . | xargs grep -n hogehoge
+					//bodyの行数も取得？
+
+					markdownsByTitle, err := markdownUsecase.SearchByTitle(title)
+					if err != nil {
+						log.Fatalf("SearchDatabase: %v\n", err)
+					}
+					markdownsByBody, resultBodyMap, err := markdownUsecase.SearchByBody(body)
+					if err != nil {
+						log.Fatalf("SearchDatabase: %v\n", err)
+					}
+
+					mdPathMap := map[string]*models.MarkdownMemo{}
+
+					for _, m := range markdownsByTitle {
+						mdPathMap[m.Path] = m
+					}
+					for _, m := range markdownsByBody {
+						mdPathMap[m.Path] = m
+					}
+
+					fmt.Println("Search Result")
+					for _, m := range mdPathMap {
+						fmt.Printf("id: %d, title: %s, path: %s, url: %s\n", m.Id, m.Title, m.Path, m.SrcUrl)
+						for _, resultBody := range resultBodyMap[m.Path] {
+							fmt.Printf("  %s\n", resultBody)
+						}
+					}
+
+				} else if title != "" {
+					markdowns, err := markdownUsecase.SearchByTitle(title)
+					if err != nil {
+						log.Fatalf("SearchDatabase: %v\n", err)
+					}
+					fmt.Println("Search Result")
+					for _, m := range markdowns {
+						fmt.Printf("id: %d, title: %s, path: %s, url: %s\n", m.Id, m.Title, m.Path, m.SrcUrl)
+					}
+				} else if body != "" {
+					markdowns, resultBodyMap, err := markdownUsecase.SearchByBody(body)
+					if err != nil {
+						log.Fatalf("SearchDatabase: %v\n", err)
+					}
+					fmt.Println("Search Result")
+					for _, m := range markdowns {
+						fmt.Printf("id: %d, title: %s, path: %s, url: %s\n", m.Id, m.Title, m.Path, m.SrcUrl)
+						//fmt.Println(resultBodyMap[m.Path])
+						for _, resultBody := range resultBodyMap[m.Path] {
+							fmt.Printf("  %s\n", resultBody)
+						}
+					}
+				}
+
+				return nil
+			},
+		},
+		//zip化する
+		{
+			Name:  "zip",
+			Usage: "zip markdown file",
+			Action: func(c *cli.Context) error {
+				db, err := models.NewDB()
+				if err != nil {
+					log.Fatalf("ZipDatabase: %v\n", err)
+				}
+				markdownRepo := models.NewMarkdownRepo(db)
+				markdownUsecase := usecases.NewMarkdownInteractor(markdownRepo)
+				// err = markdownUsecase.Zip()
+				// if err != nil {
+				// 	log.Fatalf("ZipDatabase: %v\n", err)
+				// }
+				return nil
+			},
+		},
+
+		//すべてのファイルを削除する　危険
 	}
 
 	err = app.Run(os.Args)

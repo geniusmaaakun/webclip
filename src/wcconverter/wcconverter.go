@@ -1,6 +1,7 @@
 package wcconverter
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -26,6 +27,10 @@ func (c *HTMLToMarkdownConverter) Convert(selection *goquery.Selection) (string,
 	converter := md.NewConverter("", true, c.Options)
 	markdown := converter.Convert(selection)
 	return markdown, nil
+}
+
+func (c *HTMLToMarkdownConverter) AddSrcUrlToMarkdown(srcUrl string, mdStr string) string {
+	return fmt.Sprintf("# SrcUrl: %s\n\n%s", srcUrl, mdStr)
 }
 
 func (c *HTMLToMarkdownConverter) SaveToFile(mdStr string) error {

@@ -41,6 +41,7 @@ export const Search = () => {
       setResultData(data);
       return;
     }
+    //　match  正規表現にマッチするか？gオプションで配列を返すない場合は、一つだけ
     const searchKeywords = value
       .trim()
       .toLowerCase()
