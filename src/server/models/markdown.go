@@ -154,6 +154,24 @@ func (m MarkdownRepo) FindByTitleLastOne(title string) (*MarkdownMemo, error) {
 	return nil, nil
 }
 
+//SrcUrlが一致するものを探す
+func (m MarkdownRepo) FindBySrcUrl(srcUrl string) (*MarkdownMemo, error) {
+	rows, err := m.db.Query("SELECT * FROM markdown_memo WHERE src_url = ?", srcUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		md := &MarkdownMemo{}
+		err := rows.Scan(&md.Id, &md.Title, &md.Path, &md.SrcUrl, &md.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		return md, nil
+	}
+	return nil, nil
+}
+
 func (m MarkdownRepo) SearchByTitle(title string) ([]*MarkdownMemo, error) {
 	stmt, err := m.db.Prepare("SELECT * FROM markdown_memo WHERE title LIKE ?")
 	if err != nil {

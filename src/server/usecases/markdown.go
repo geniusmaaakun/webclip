@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"archive/zip"
 	"bufio"
 	"bytes"
 	"errors"
@@ -8,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"webclip/src/server/models"
@@ -131,6 +133,7 @@ func (u *MarkdownInteractor) DeleteIfNotExistsByPath() error {
 	//存在しないか、ディrテクトリの場合削除
 	for _, md := range mds {
 		file, err := os.Open(md.Path)
+		//ファイルが存在しない場合
 		if err != nil {
 			if os.IsNotExist(err) {
 				log.Println(fmt.Sprintf("delete data: %s", md.Path))
@@ -139,16 +142,18 @@ func (u *MarkdownInteractor) DeleteIfNotExistsByPath() error {
 					return err
 				}
 			}
-		}
-		info, err := file.Stat()
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			log.Println(fmt.Sprintf("delete data: %s", md.Path))
-			err := u.markdownRepo.DeleteByPath(md)
+			//ファイルが存在する場合　ディレクトリの場合
+		} else {
+			info, err := file.Stat()
 			if err != nil {
 				return err
+			}
+			if info.IsDir() {
+				log.Println(fmt.Sprintf("delete data: %s", md.Path))
+				err := u.markdownRepo.DeleteByPath(md)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
@@ -209,4 +214,80 @@ func (m *MarkdownInteractor) SearchByBody(bodyStr string) ([]*models.MarkdownMem
 	return result, resultBodyInFile, nil
 }
 
-//ファイルを一箇所に集める。削除して移動する。
+//配列のファイルリストをzipに圧縮する
+func createZip(files []string, zipFilename string) error {
+	//zipファイルを作成
+	zipFile, err := os.Create(zipFilename)
+	if err != nil {
+		return err
+	}
+	defer zipFile.Close()
+
+	//zip.Writerを作成
+	zipWriter := zip.NewWriter(zipFile)
+	defer zipWriter.Close()
+
+	//ファイルをzipに追加
+	for _, file := range files {
+		if err := addFileToZip(zipWriter, file); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+//zipにファイルを追加する
+func addFileToZip(zipWriter *zip.Writer, file string) error {
+	//ファイルを開く
+	srcFile, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer srcFile.Close()
+
+	//ファイル情報を取得
+	fileInfo, err := srcFile.Stat()
+	if err != nil {
+		return err
+	}
+
+	//ヘッダーを作成 ファイル情報を渡す
+	header, err := zip.FileInfoHeader(fileInfo)
+	if err != nil {
+		return err
+	}
+
+	//ヘッダーのNameを設定
+	header.Name = filepath.Join(filepath.Base(filepath.Dir(file)), filepath.Base(file))
+	//ヘッダーのMethodを設定
+	header.Method = zip.Deflate
+
+	//ヘッダーを元にファイルをzipに書き込む
+	writer, err := zipWriter.CreateHeader(header)
+	if err != nil {
+		return err
+	}
+	//ファイルをzipに書き込む
+	_, err = io.Copy(writer, srcFile)
+	return err
+}
+
+//ファイルを一箇所に集めるためにzip化
+func (m *MarkdownInteractor) CreateZipFile(mds []*models.MarkdownMemo) error {
+	if len(mds) == 0 {
+		return errors.New("no data")
+	}
+
+	var files []string
+	for _, md := range mds {
+		files = append(files, md.Path)
+	}
+
+	//zip化
+	err := createZip(files, "webclip.zip")
+	if err != nil {
+		return err
+	}
+	return nil
+}

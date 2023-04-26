@@ -106,7 +106,14 @@ func main() {
 				mdData := models.NewMarkdownMemo(outdir, absPath, url)
 				err = repo.Create(mdData)
 				if err != nil {
-					log.Fatalf("SaveDatabase: %v\n", err)
+					existMd, err := repo.FindBySrcUrl(url)
+					if err != nil {
+						log.Fatalf("SaveDatabase: %v\n", err)
+					}
+					if existMd != nil {
+						log.Printf("already exist: %s", existMd.Path)
+						return nil
+					}
 				}
 			}
 			return nil
@@ -152,7 +159,6 @@ func main() {
 				if err != nil {
 					log.Fatalf("CleanDatabase: %v\n", err)
 				}
-
 				return nil
 			},
 		},
@@ -187,10 +193,9 @@ func main() {
 				markdownRepo := models.NewMarkdownRepo(db)
 				markdownUsecase := usecases.NewMarkdownInteractor(markdownRepo)
 
+				//find . | xargs grep -n hogehoge
+				//bodyの行数も取得？
 				if title != "" && body != "" {
-					//find . | xargs grep -n hogehoge
-					//bodyの行数も取得？
-
 					markdownsByTitle, err := markdownUsecase.SearchByTitle(title)
 					if err != nil {
 						log.Fatalf("SearchDatabase: %v\n", err)
@@ -248,17 +253,77 @@ func main() {
 		{
 			Name:  "zip",
 			Usage: "zip markdown file",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "title",
+					Aliases: []string{"t"},
+					Usage:   "search title",
+				},
+				&cli.StringFlag{
+					Name:    "body",
+					Aliases: []string{"b"},
+					Usage:   "search body",
+				},
+			},
 			Action: func(c *cli.Context) error {
 				db, err := models.NewDB()
 				if err != nil {
-					log.Fatalf("ZipDatabase: %v\n", err)
+					log.Fatalf("CreateZip: %v\n", err)
 				}
 				markdownRepo := models.NewMarkdownRepo(db)
 				markdownUsecase := usecases.NewMarkdownInteractor(markdownRepo)
-				// err = markdownUsecase.Zip()
-				// if err != nil {
-				// 	log.Fatalf("ZipDatabase: %v\n", err)
-				// }
+
+				title := c.String("title")
+				body := c.String("body")
+
+				files := []*models.MarkdownMemo{}
+
+				if title != "" && body != "" {
+					markdownsByTitle, err := markdownUsecase.SearchByTitle(title)
+					if err != nil {
+						log.Fatalf("CreateZip: %v\n", err)
+					}
+					markdownsByBody, _, err := markdownUsecase.SearchByBody(body)
+					if err != nil {
+						log.Fatalf("CreateZip: %v\n", err)
+					}
+
+					mdPathMap := map[string]*models.MarkdownMemo{}
+
+					for _, m := range markdownsByTitle {
+						mdPathMap[m.Path] = m
+					}
+					for _, m := range markdownsByBody {
+						mdPathMap[m.Path] = m
+					}
+
+					for _, m := range mdPathMap {
+						files = append(files, m)
+					}
+				} else if title != "" {
+					markdowns, err := markdownUsecase.SearchByTitle(title)
+					if err != nil {
+						log.Fatalf("CreateZip: %v\n", err)
+					}
+					files = markdowns
+				} else if body != "" {
+					markdowns, _, err := markdownUsecase.SearchByBody(body)
+					if err != nil {
+						log.Fatalf("CreateZip: %v\n", err)
+					}
+					files = markdowns
+				} else {
+					markdowns, err := markdownUsecase.FindAll()
+					if err != nil {
+						log.Fatalf("CreateZip: %v\n", err)
+					}
+					files = markdowns
+				}
+
+				err = markdownUsecase.CreateZipFile(files)
+				if err != nil {
+					log.Fatalf("CreateZip: %v\n", err)
+				}
 				return nil
 			},
 		},
