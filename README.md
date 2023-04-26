@@ -9,7 +9,7 @@
 
 # サブコマンド一覧
 
-search: 保存したファイルから条件に合うファイルを探します
+search: 保存したファイルから条件に合うファイルをデータベースから探します。--save を指定した場合に限ります
 ```
 webclip search -b "{body}"
 webclip search -t "{title}"
@@ -21,7 +21,17 @@ webclip server
 ```
 
 clean: ファイルパスが存在しない場合、DBからデータを削除します。DBの容量を節約できます。
+```
+webclip clean
+```
 
+zip: ファイルをzip化します
+```
+webclip zip
+webclip zip -t "{title}"
+webclip zip -b "{body}"
+webclip zip -t "{title}" -b "{body}"
+```
 
 # webclipをP2Pで共有
 

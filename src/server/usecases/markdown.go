@@ -268,7 +268,7 @@ func addFileToZip(zipWriter *zip.Writer, file string) error {
 	if err != nil {
 		return err
 	}
-	//ファイルをzipに書き込む
+	//ファイルをzipに書き込む。ここに書き込むとzipファイルに書き込まれる
 	_, err = io.Copy(writer, srcFile)
 	return err
 }
