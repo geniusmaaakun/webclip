@@ -5,9 +5,9 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strconv"
 	"time"
 	"webclip/src/server/models"
+	"webclip/src/server/usecases"
 
 	"github.com/gorilla/mux"
 )
@@ -49,15 +49,15 @@ func (m *MarkdownMemo) ConvertFrom(md *models.MarkdownMemo) error {
 }
 
 type MarkdownHandler struct {
-	MarkdownRepo *models.MarkdownRepo
+	MarkdownInteractor *usecases.MarkdownInteractor
 }
 
-func NewMarkdownHandler(repo *models.MarkdownRepo) *MarkdownHandler {
-	return &MarkdownHandler{MarkdownRepo: repo}
+func NewMarkdownHandler(i *usecases.MarkdownInteractor) *MarkdownHandler {
+	return &MarkdownHandler{MarkdownInteractor: i}
 }
 
 func (h *MarkdownHandler) ListAll(w http.ResponseWriter, r *http.Request) {
-	markdowns, err := h.MarkdownRepo.FindAll()
+	markdowns, err := h.MarkdownInteractor.FindAll()
 	if err != nil {
 		//独自エラーを返す
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -93,13 +93,8 @@ IDをキーとしてデータベースからデータを取得すること自体
 func (h *MarkdownHandler) GetById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	idStr := vars["id"]
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		//独自エラーを返す
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	md, err := h.MarkdownRepo.FindById(id)
+
+	md, err := h.MarkdownInteractor.FindById(idStr)
 	if err != nil {
 		//独自エラーを返す
 		http.Error(w, err.Error(), http.StatusInternalServerError)

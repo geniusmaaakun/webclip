@@ -21,30 +21,54 @@ import (
 //DBへのアクセス
 //加工
 
-type MarkdownUsecase interface {
+/*
+type markdownUsecase interface {
+	Create(title, path, srcUrl string) error
+	Delete(title string) error
+	DeleteByPath(path string) error
+	//DeleteById(id int) error
+
+	//GetByTitle(title string) (*models.MarkdownMemo, error)
+	//GetByPath(path string) (*models.MarkdownMemo, error)
+	//GetById(id int) (*models.MarkdownMemo, error)
+	FindAll() ([]*models.MarkdownMemo, error)
 }
+*/
 
 type MarkdownInteractor struct {
-	markdownRepo *models.MarkdownRepo
+	txRepo       TransactionRepo
+	markdownRepo MarkdownRepo
 }
 
-func NewMarkdownInteractor(mdRepo *models.MarkdownRepo) *MarkdownInteractor {
-	return &MarkdownInteractor{mdRepo}
+func NewMarkdownInteractor(txRepo TransactionRepo, mdRepo MarkdownRepo) *MarkdownInteractor {
+	return &MarkdownInteractor{txRepo: txRepo, markdownRepo: mdRepo}
 }
 
-func (mi *MarkdownInteractor) Create(title, path, srcUrl string) error {
+func (u *MarkdownInteractor) Create(title, path, srcUrl string) error {
 	md := models.NewMarkdownMemo(title, path, srcUrl)
-	return mi.markdownRepo.Create(md)
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return err
+	}
+	return u.markdownRepo.Create(tx, md)
 }
 
-func (mi *MarkdownInteractor) Delete(title string) error {
+func (u *MarkdownInteractor) Delete(title string) error {
 	md := models.NewMarkdownMemo(title, "", "")
-	return mi.markdownRepo.DeleteByTitle(md)
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return err
+	}
+	return u.markdownRepo.DeleteByTitle(tx, md)
 }
 
-func (mi *MarkdownInteractor) DeleteByPath(path string) error {
+func (u *MarkdownInteractor) DeleteByPath(path string) error {
 	md := models.NewMarkdownMemo("", path, "")
-	return mi.markdownRepo.DeleteByPath(md)
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return err
+	}
+	return u.markdownRepo.DeleteByPath(tx, md)
 }
 
 /*
@@ -70,7 +94,11 @@ func (mi *MarkdownInteractor) GetById(id int) (*models.MarkdownMemo, error) {
 */
 
 func (u *MarkdownInteractor) FindAll() ([]*models.MarkdownMemo, error) {
-	mds, err := u.markdownRepo.FindAll()
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return nil, err
+	}
+	mds, err := u.markdownRepo.FindAll(tx)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +106,11 @@ func (u *MarkdownInteractor) FindAll() ([]*models.MarkdownMemo, error) {
 }
 
 func (u *MarkdownInteractor) FindByTitle(title string) ([]*models.MarkdownMemo, error) {
-	mds, err := u.markdownRepo.FindByTitle(title)
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return nil, err
+	}
+	mds, err := u.markdownRepo.FindByTitle(tx, title)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +118,11 @@ func (u *MarkdownInteractor) FindByTitle(title string) ([]*models.MarkdownMemo, 
 }
 
 func (u *MarkdownInteractor) FindByPath(path string) ([]*models.MarkdownMemo, error) {
-	mds, err := u.markdownRepo.FindByPath(path)
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return nil, err
+	}
+	mds, err := u.markdownRepo.FindByPath(tx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +135,11 @@ func (u *MarkdownInteractor) FindById(idStr string) (*models.MarkdownMemo, error
 		//独自エラーを返す
 		return nil, err
 	}
-	md, err := u.markdownRepo.FindById(id)
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return nil, err
+	}
+	md, err := u.markdownRepo.FindById(tx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +162,11 @@ func (u *MarkdownInteractor) FindBySrcUrl(srcUrl string) ([]byte, error) {
 
 //cleanコマンドで実行
 func (u *MarkdownInteractor) DeleteIfNotExistsByPath() error {
-	mds, err := u.markdownRepo.FindAll()
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return err
+	}
+	mds, err := u.markdownRepo.FindAll(tx)
 	if err != nil {
 		return err
 	}
@@ -137,7 +181,7 @@ func (u *MarkdownInteractor) DeleteIfNotExistsByPath() error {
 		if err != nil {
 			if os.IsNotExist(err) {
 				log.Println(fmt.Sprintf("delete data: %s", md.Path))
-				err := u.markdownRepo.DeleteByPath(md)
+				err := u.markdownRepo.DeleteByPath(tx, md)
 				if err != nil {
 					return err
 				}
@@ -150,7 +194,7 @@ func (u *MarkdownInteractor) DeleteIfNotExistsByPath() error {
 			}
 			if info.IsDir() {
 				log.Println(fmt.Sprintf("delete data: %s", md.Path))
-				err := u.markdownRepo.DeleteByPath(md)
+				err := u.markdownRepo.DeleteByPath(tx, md)
 				if err != nil {
 					return err
 				}
@@ -167,18 +211,26 @@ func (u *MarkdownInteractor) SearchByTitle(title string) ([]*models.MarkdownMemo
 	if title == "" {
 		return nil, errors.New("title is empty")
 	}
-	mds, err := u.markdownRepo.SearchByTitle(title)
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return nil, err
+	}
+	mds, err := u.markdownRepo.SearchByTitle(tx, title)
 	if err != nil {
 		return nil, err
 	}
 	return mds, nil
 }
 
-func (m *MarkdownInteractor) SearchByBody(bodyStr string) ([]*models.MarkdownMemo, map[string][]string, error) {
+func (u *MarkdownInteractor) SearchByBody(bodyStr string) ([]*models.MarkdownMemo, map[string][]string, error) {
 	if bodyStr == "" {
 		return nil, nil, errors.New("body is empty")
 	}
-	mds, err := m.markdownRepo.FindAll()
+	tx, err := u.txRepo.NewTransaction(false)
+	if err != nil {
+		return nil, nil, err
+	}
+	mds, err := u.markdownRepo.FindAll(tx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -274,7 +326,7 @@ func addFileToZip(zipWriter *zip.Writer, file string) error {
 }
 
 //ファイルを一箇所に集めるためにzip化
-func (m *MarkdownInteractor) CreateZipFile(mds []*models.MarkdownMemo) error {
+func (u *MarkdownInteractor) CreateZipFile(mds []*models.MarkdownMemo) error {
 	if len(mds) == 0 {
 		return errors.New("no data")
 	}

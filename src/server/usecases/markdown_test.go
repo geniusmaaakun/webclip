@@ -2,12 +2,11 @@ package usecases
 
 import (
 	"testing"
-	"webclip/src/server/models"
 )
 
 func TestMarkdownInteractor_DeleteIfNotExistsByPath(t *testing.T) {
 	type fields struct {
-		markdownRepo *models.MarkdownRepo
+		markdownRepo MarkdownRepo
 	}
 	tests := []struct {
 		name    string

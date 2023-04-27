@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 	"webclip/src/server/models"
+	"webclip/src/server/models/rdb"
 )
 
 /*
@@ -22,13 +23,21 @@ func TestMain(m *testing.M) {
 }
 */
 
+func TestNewDB(t *testing.T) {
+	_, err := models.NewDB()
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestCreateMd(t *testing.T) {
 	db, err := models.NewDB()
 	if err != nil {
 		return
 	}
 
-	MarkdownRepo := models.NewMarkdownRepo(db)
+	txManager := rdb.NewTransactionManager(db)
+	MarkdownRepo := rdb.NewMarkdownRepo()
 
 	type args struct {
 		title  string
@@ -54,12 +63,16 @@ func TestCreateMd(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			md := models.NewMarkdownMemo(tt.args.title, tt.args.path, tt.args.srcURL)
-			err = MarkdownRepo.Create(md)
+			tx, err := txManager.NewTransaction(false)
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, err := MarkdownRepo.FindByTitleLastOne(md.Title)
+			md := models.NewMarkdownMemo(tt.args.title, tt.args.path, tt.args.srcURL)
+			err = MarkdownRepo.Create(tx, md)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got, err := MarkdownRepo.FindByTitleLastOne(tx, md.Title)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -75,7 +88,9 @@ func TestDeleteMd(t *testing.T) {
 	if err != nil {
 		return
 	}
-	MarkdownRepo := models.NewMarkdownRepo(db)
+	txManager := rdb.NewTransactionManager(db)
+
+	MarkdownRepo := rdb.NewMarkdownRepo()
 
 	type args struct {
 		title  string
@@ -101,16 +116,20 @@ func TestDeleteMd(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+			tx, err := txManager.NewTransaction(false)
+			if err != nil {
+				t.Fatal(err)
+			}
 			md := models.NewMarkdownMemo(tt.args.title, tt.args.path, tt.args.srcURL)
-			err = MarkdownRepo.Create(md)
+			err = MarkdownRepo.Create(tx, md)
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = MarkdownRepo.DeleteByTitle(md)
+			err = MarkdownRepo.DeleteByTitle(tx, md)
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, err := MarkdownRepo.FindByTitleLastOne(md.Title)
+			got, err := MarkdownRepo.FindByTitleLastOne(tx, md.Title)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -127,7 +146,8 @@ func TestUpdateMd(t *testing.T) {
 	if err != nil {
 		return
 	}
-	MarkdownRepo := models.NewMarkdownRepo(db)
+	txManager := rdb.NewTransactionManager(db)
+	MarkdownRepo := rdb.NewMarkdownRepo()
 
 	type args struct {
 		title  string
@@ -153,13 +173,14 @@ func TestUpdateMd(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+			tx, err := txManager.NewTransaction(false)
 			md := models.NewMarkdownMemo(tt.args.title, tt.args.path, tt.args.srcURL)
-			err = MarkdownRepo.Create(md)
+			err = MarkdownRepo.Create(tx, md)
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			updateMd, err := MarkdownRepo.FindByTitleLastOne(md.Title)
+			updateMd, err := MarkdownRepo.FindByTitleLastOne(tx, md.Title)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -167,9 +188,9 @@ func TestUpdateMd(t *testing.T) {
 			updateMd.SrcUrl = "srcupdate"
 			updateMd.Path = "pathupdate"
 
-			err = MarkdownRepo.Update(updateMd)
+			err = MarkdownRepo.Update(tx, updateMd)
 
-			got, err := MarkdownRepo.FindByTitleLastOne(updateMd.Title)
+			got, err := MarkdownRepo.FindByTitleLastOne(tx, updateMd.Title)
 			if err != nil {
 				t.Fatal(err)
 			}

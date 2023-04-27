@@ -4,7 +4,8 @@ import (
 	"database/sql"
 	"net/http"
 	"webclip/src/server/controllers/handler"
-	"webclip/src/server/models"
+	"webclip/src/server/models/rdb"
+	"webclip/src/server/usecases"
 
 	"github.com/gorilla/mux"
 )
@@ -17,7 +18,10 @@ type Server struct {
 }
 
 func NewServer(host, port string, db *sql.DB) *Server {
-	markdownHandler := handler.NewMarkdownHandler(models.NewMarkdownRepo(db))
+	txRepo := rdb.NewTransactionManager(db)
+	markdownRepo := rdb.NewMarkdownRepo()
+	markdownUsecase := usecases.NewMarkdownInteractor(txRepo, markdownRepo)
+	markdownHandler := handler.NewMarkdownHandler(markdownUsecase)
 	return &Server{Host: host, Port: port, MarkdownHandler: markdownHandler}
 }
 
