@@ -15,6 +15,7 @@ func NewMarkdownRepo() *MarkdownManager {
 func (m *MarkdownManager) Create(tx usecases.Transaction, md *models.MarkdownMemo) error {
 	stmt, err := tx.Prepare("INSERT INTO markdown_memo (title, path, src_url, created_at) VALUES (?, ?, ?, ?)")
 	_, err = stmt.Exec(md.Title, md.Path, md.SrcUrl, md.CreatedAt)
+	//_, err := tx.Exec("INSERT INTO markdown_memo (title, path, src_url, created_at) VALUES (?, ?, ?, ?)", md.Title, md.Path, md.SrcUrl, md.CreatedAt)
 	if err != nil {
 		return err
 	}
@@ -22,7 +23,8 @@ func (m *MarkdownManager) Create(tx usecases.Transaction, md *models.MarkdownMem
 }
 
 func (m *MarkdownManager) Delete(tx usecases.Transaction, md *models.MarkdownMemo) error {
-	_, err := tx.Exec("DELETE FROM markdown_memo WHERE id = ?", md.Id)
+	stmt, err := tx.Prepare("DELETE FROM markdown_memo WHERE id = ?")
+	_, err = stmt.Exec(md.Id)
 	if err != nil {
 		return err
 	}
@@ -30,7 +32,8 @@ func (m *MarkdownManager) Delete(tx usecases.Transaction, md *models.MarkdownMem
 }
 
 func (m *MarkdownManager) DeleteByTitle(tx usecases.Transaction, md *models.MarkdownMemo) error {
-	_, err := tx.Exec("DELETE FROM markdown_memo WHERE title = ?", md.Title)
+	stmt, err := tx.Prepare("DELETE FROM markdown_memo WHERE title = ?")
+	_, err = stmt.Exec(md.Title)
 	if err != nil {
 		return err
 	}
@@ -39,7 +42,8 @@ func (m *MarkdownManager) DeleteByTitle(tx usecases.Transaction, md *models.Mark
 
 //cleanコマンドで削除する
 func (m *MarkdownManager) DeleteByPath(tx usecases.Transaction, md *models.MarkdownMemo) error {
-	_, err := tx.Exec("DELETE FROM markdown_memo WHERE path = ?", md.Path)
+	stmt, err := tx.Prepare("DELETE FROM markdown_memo WHERE path = ?")
+	_, err = stmt.Exec(md.Path)
 	if err != nil {
 		return err
 	}
@@ -47,7 +51,8 @@ func (m *MarkdownManager) DeleteByPath(tx usecases.Transaction, md *models.Markd
 }
 
 func (m *MarkdownManager) Update(tx usecases.Transaction, md *models.MarkdownMemo) error {
-	_, err := tx.Exec("UPDATE markdown_memo SET title = ?, path = ?, src_url = ? WHERE id = ?", md.Title, md.Path, md.SrcUrl, md.Id)
+	stmt, err := tx.Prepare("UPDATE markdown_memo SET title = ?, path = ?, src_url = ? WHERE id = ?")
+	_, err = stmt.Exec(md.Title, md.Path, md.SrcUrl, md.Id)
 	if err != nil {
 		return err
 	}
@@ -55,7 +60,6 @@ func (m *MarkdownManager) Update(tx usecases.Transaction, md *models.MarkdownMem
 }
 
 func (m *MarkdownManager) FindById(tx usecases.Transaction, id int) (*models.MarkdownMemo, error) {
-	//prepareをすべてで使う
 	stmt, err := tx.Prepare("SELECT * FROM markdown_memo WHERE id = ?")
 	if err != nil {
 		return nil, err
@@ -70,7 +74,11 @@ func (m *MarkdownManager) FindById(tx usecases.Transaction, id int) (*models.Mar
 }
 
 func (m *MarkdownManager) FindAll(tx usecases.Transaction) ([]*models.MarkdownMemo, error) {
-	rows, err := tx.Query("SELECT * FROM markdown_memo")
+	stmt, err := tx.Prepare("SELECT * FROM markdown_memo")
+	if err != nil {
+		return nil, err
+	}
+	rows, err := stmt.Query()
 	if err != nil {
 		return nil, err
 	}
@@ -88,10 +96,19 @@ func (m *MarkdownManager) FindAll(tx usecases.Transaction) ([]*models.MarkdownMe
 }
 
 func (m *MarkdownManager) FindByTitle(tx usecases.Transaction, title string) ([]*models.MarkdownMemo, error) {
+	// stmt, err := tx.Prepare("SELECT * FROM markdown_memo WHERE title = ?")
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// rows, err := stmt.Query(title)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	rows, err := tx.Query("SELECT * FROM markdown_memo WHERE title = ?", title)
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 	memos := []*models.MarkdownMemo{}
 	for rows.Next() {
@@ -107,7 +124,11 @@ func (m *MarkdownManager) FindByTitle(tx usecases.Transaction, title string) ([]
 
 //
 func (m *MarkdownManager) FindByPath(tx usecases.Transaction, path string) ([]*models.MarkdownMemo, error) {
-	rows, err := tx.Query("SELECT * FROM markdown_memo WHERE path = ?", path)
+	stmt, err := tx.Prepare("SELECT * FROM markdown_memo WHERE path = ?")
+	if err != nil {
+		return nil, err
+	}
+	rows, err := stmt.Query(path)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +147,11 @@ func (m *MarkdownManager) FindByPath(tx usecases.Transaction, path string) ([]*m
 
 //test用
 func (m *MarkdownManager) FindByTitleLastOne(tx usecases.Transaction, title string) (*models.MarkdownMemo, error) {
-	rows, err := tx.Query("SELECT * FROM markdown_memo WHERE title = ? ORDER BY id DESC LIMIT 1", title)
+	stmt, err := tx.Prepare("SELECT * FROM markdown_memo WHERE title = ? ORDER BY id DESC LIMIT 1")
+	if err != nil {
+		return nil, err
+	}
+	rows, err := stmt.Query(title)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +169,11 @@ func (m *MarkdownManager) FindByTitleLastOne(tx usecases.Transaction, title stri
 
 //SrcUrlが一致するものを探す
 func (m *MarkdownManager) FindBySrcUrl(tx usecases.Transaction, srcUrl string) (*models.MarkdownMemo, error) {
-	rows, err := tx.Query("SELECT * FROM markdown_memo WHERE src_url = ?", srcUrl)
+	stmt, err := tx.Prepare("SELECT * FROM markdown_memo WHERE src_url = ?")
+	if err != nil {
+		return nil, err
+	}
+	rows, err := stmt.Query(srcUrl)
 	if err != nil {
 		return nil, err
 	}

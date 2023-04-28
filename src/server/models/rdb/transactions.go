@@ -24,6 +24,7 @@ func (tx *TransactionManager) NewTransaction(on bool) (usecases.Transaction, err
 }
 
 //トランザクションの処理
+//ロールバックが必要な場合に使用
 func (*TransactionManager) Transaction(CTx usecases.Transaction, txFunc func(*sql.Tx) (interface{}, error)) (data interface{}, err error) {
 	tx, isTx := CTx.(*sql.Tx)
 	if !isTx {
