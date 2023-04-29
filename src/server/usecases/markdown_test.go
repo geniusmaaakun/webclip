@@ -90,11 +90,6 @@ func TestDelete(t *testing.T) {
 		want bool //インスタンスを返す様にcreateを変更する？
 	}{
 		{"normal 1", args{"test1", "/test1/test1", "http://test1/test1"}, true},
-		{"fail SrcURL = isNotURL", args{"test2", "/test2/test2", "test1/test1"}, false},
-		{"fail title = isEmpty", args{"", "/test2/test2", "test1/test1"}, false},
-		{"fail path = isEmpty", args{"test3", "", "test1/test1"}, false},
-		{"fail srcUrl = isEmpty", args{"test4", "test4", ""}, false},
-		{"fail allField = isEmpty", args{"", "", ""}, false},
 	}
 
 	defer t.Cleanup(func() {
@@ -107,7 +102,10 @@ func TestDelete(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-
+			err := markdownUsecase.Create(tt.args.title, tt.args.path, tt.args.srcUrl)
+			if err != nil {
+				t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+			}
 		})
 	}
 }
