@@ -1,0 +1,14 @@
+{
+    "Port"        : "8080",
+    "WindowsDBName": "C:\\Program Files\\webclip",
+    "LinuxDBName" : "/var/lib/webclip",
+    "MacDBName" : "/Library/webclip",
+
+    "SQLDriver"   : "sqlite3",
+    "SQLsrc"      : "webclip.sql",
+    "redis"       : "localhost:6379",
+    "LogFile"     : "logs/webapp.log",
+    "ErrFile"     : "logs/err.log",
+    "accessLogFile": "logs/access.log",
+    "Static"      : "repo"
+}

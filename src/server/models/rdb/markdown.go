@@ -13,6 +13,7 @@ func NewMarkdownRepo() *MarkdownManager {
 }
 
 func (m *MarkdownManager) Create(tx usecases.Transaction, md *models.MarkdownMemo) error {
+	//SQLインジェクションを回避される
 	stmt, err := tx.Prepare("INSERT INTO markdown_memo (title, path, src_url, created_at) VALUES (?, ?, ?, ?)")
 	_, err = stmt.Exec(md.Title, md.Path, md.SrcUrl, md.CreatedAt)
 	//_, err := tx.Exec("INSERT INTO markdown_memo (title, path, src_url, created_at) VALUES (?, ?, ?, ?)", md.Title, md.Path, md.SrcUrl, md.CreatedAt)
@@ -22,6 +23,7 @@ func (m *MarkdownManager) Create(tx usecases.Transaction, md *models.MarkdownMem
 	return nil
 }
 
+//unused
 func (m *MarkdownManager) Delete(tx usecases.Transaction, md *models.MarkdownMemo) error {
 	stmt, err := tx.Prepare("DELETE FROM markdown_memo WHERE id = ?")
 	_, err = stmt.Exec(md.Id)
@@ -31,9 +33,9 @@ func (m *MarkdownManager) Delete(tx usecases.Transaction, md *models.MarkdownMem
 	return nil
 }
 
-func (m *MarkdownManager) DeleteByTitle(tx usecases.Transaction, md *models.MarkdownMemo) error {
+func (m *MarkdownManager) DeleteByTitle(tx usecases.Transaction, title string) error {
 	stmt, err := tx.Prepare("DELETE FROM markdown_memo WHERE title = ?")
-	_, err = stmt.Exec(md.Title)
+	_, err = stmt.Exec(title)
 	if err != nil {
 		return err
 	}
@@ -41,15 +43,16 @@ func (m *MarkdownManager) DeleteByTitle(tx usecases.Transaction, md *models.Mark
 }
 
 //cleanコマンドで削除する
-func (m *MarkdownManager) DeleteByPath(tx usecases.Transaction, md *models.MarkdownMemo) error {
+func (m *MarkdownManager) DeleteByPath(tx usecases.Transaction, path string) error {
 	stmt, err := tx.Prepare("DELETE FROM markdown_memo WHERE path = ?")
-	_, err = stmt.Exec(md.Path)
+	_, err = stmt.Exec(path)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
+//unused
 func (m *MarkdownManager) Update(tx usecases.Transaction, md *models.MarkdownMemo) error {
 	stmt, err := tx.Prepare("UPDATE markdown_memo SET title = ?, path = ?, src_url = ? WHERE id = ?")
 	_, err = stmt.Exec(md.Title, md.Path, md.SrcUrl, md.Id)
@@ -167,6 +170,7 @@ func (m *MarkdownManager) FindByTitleLastOne(tx usecases.Transaction, title stri
 	return nil, nil
 }
 
+//unused
 //SrcUrlが一致するものを探す
 func (m *MarkdownManager) FindBySrcUrl(tx usecases.Transaction, srcUrl string) (*models.MarkdownMemo, error) {
 	stmt, err := tx.Prepare("SELECT * FROM markdown_memo WHERE src_url = ?")

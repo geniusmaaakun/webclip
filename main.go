@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"webclip/src/actions"
-	"webclip/src/server/models"
 
 	"github.com/urfave/cli/v2"
 )
@@ -13,10 +12,6 @@ import (
 //上記のコードでは、`HTMLToMarkdownConverter`と`wcdownloader`という構造体を使用して、処理を行っています。これにより、コードがより構造化され、プロのエンジニアが書いたようなスタイルになっています。
 
 func main() {
-	_, err := models.NewDB()
-	if err != nil {
-		log.Fatal(err)
-	}
 	app := &cli.App{
 		Name:  "HTML to Markdown converter",
 		Usage: "Convert HTML files to Markdown with optional image downloading",
@@ -102,7 +97,7 @@ func main() {
 		//すべてのファイルを削除する　危険
 	}
 
-	err = app.Run(os.Args)
+	err := app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -9,6 +9,10 @@ import (
 )
 
 /*
+1 rdb  存在しないデータに対するテスト　インジェクション
+
+
+
 データベースに対するテストケースを実施する際には、様々なシナリオを考慮することが重要です。以下に、一般的なテストケースをいくつか挙げます：
 
 1 正常系（成功）:
@@ -48,14 +52,14 @@ SQLクエリエラー（例：構文エラーやテーブル名・カラム名�
 */
 
 func TestNewDB(t *testing.T) {
-	_, err := models.NewDB()
+	_, err := models.NewDB("webclip.sql")
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestCreateMd(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -111,7 +115,7 @@ func TestCreateMd(t *testing.T) {
 }
 
 func TestCreateMdUnique(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -164,7 +168,7 @@ func TestCreateMdUnique(t *testing.T) {
 //sqlite3では最大文字数が不明なため、テストできない。
 /*
 func TestCreateMdMax(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -240,7 +244,7 @@ func TestCreateMdMax(t *testing.T) {
 */
 
 func TestCreateMdInjection(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -374,7 +378,7 @@ func TestMarkdownManager_Create(t *testing.T) {
 */
 
 func TestDeleteMd(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -435,7 +439,7 @@ func TestDeleteMd(t *testing.T) {
 }
 
 func TestDeleteByTitle(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -478,7 +482,7 @@ func TestDeleteByTitle(t *testing.T) {
 			// }
 
 			//データがなくてもエラーは返さない
-			err = MarkdownRepo.DeleteByTitle(tx, md)
+			err = MarkdownRepo.DeleteByTitle(tx, md.Title)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -494,7 +498,7 @@ func TestDeleteByTitle(t *testing.T) {
 	}
 }
 func TestDeleteByTitleInNotExistData(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -535,7 +539,7 @@ func TestDeleteByTitleInNotExistData(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			err = MarkdownRepo.DeleteByTitle(tx, md)
+			err = MarkdownRepo.DeleteByTitle(tx, md.Title)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -552,7 +556,7 @@ func TestDeleteByTitleInNotExistData(t *testing.T) {
 
 //unused
 func TestUpdateMd(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -624,7 +628,7 @@ func TestUpdateMd(t *testing.T) {
 
 //injection系
 func TestFindById(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -684,7 +688,7 @@ func TestFindById(t *testing.T) {
 }
 
 func TestFindAll(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -744,7 +748,7 @@ func TestFindAll(t *testing.T) {
 }
 
 func TestFindByTitle(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -804,7 +808,7 @@ func TestFindByTitle(t *testing.T) {
 }
 
 func TestFindByTitleInjection(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}
@@ -845,7 +849,7 @@ func TestFindByTitleInjection(t *testing.T) {
 }
 
 func TestSearchByTitle(t *testing.T) {
-	db, err := models.NewDB()
+	db, err := models.NewDB("webclip.sql")
 	if err != nil {
 		return
 	}

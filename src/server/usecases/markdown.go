@@ -13,6 +13,9 @@ import (
 	"strconv"
 	"strings"
 	"webclip/src/server/models"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 )
 
 //バリデーション
@@ -44,8 +47,20 @@ func NewMarkdownInteractor(txRepo TransactionRepo, mdRepo MarkdownRepo) *Markdow
 	return &MarkdownInteractor{txRepo: txRepo, markdownRepo: mdRepo}
 }
 
+//テストしやすい様に、インスタンスを返す様にした方がいいかも
 func (u *MarkdownInteractor) Create(title, path, srcUrl string) error {
 	md := models.NewMarkdownMemo(title, path, srcUrl)
+	//バリデーション
+	//https://zenn.dev/mattn/articles/893f28eff96129
+	err := validation.ValidateStruct(
+		md,
+		validation.Field(&md.Title, validation.Required.Error("タイトルは必須入力です"), validation.Length(1, 255)),
+		validation.Field(&md.Path, validation.Required.Error("ファイルパスが存在しません"), validation.Length(1, 255)),
+		validation.Field(&md.SrcUrl, validation.Required.Error("URLは必須入力です"), is.URL),
+	)
+	if err != nil {
+		return err
+	}
 	tx, err := u.txRepo.NewTransaction(false)
 	if err != nil {
 		return err
@@ -55,20 +70,35 @@ func (u *MarkdownInteractor) Create(title, path, srcUrl string) error {
 
 func (u *MarkdownInteractor) Delete(title string) error {
 	md := models.NewMarkdownMemo(title, "", "")
+	err := validation.ValidateStruct(
+		md,
+		validation.Field(&md.Title, validation.Required.Error("タイトルは必須入力です"), validation.Length(1, 255)),
+	)
+	if err != nil {
+		return err
+	}
 	tx, err := u.txRepo.NewTransaction(false)
 	if err != nil {
 		return err
 	}
-	return u.markdownRepo.DeleteByTitle(tx, md)
+	//文字列を渡す
+	return u.markdownRepo.DeleteByTitle(tx, md.Title)
 }
 
 func (u *MarkdownInteractor) DeleteByPath(path string) error {
 	md := models.NewMarkdownMemo("", path, "")
+	err := validation.ValidateStruct(
+		md,
+		validation.Field(&md.Path, validation.Required.Error("ファイルパスが存在しません"), validation.Length(1, 255)),
+	)
+	if err != nil {
+		return err
+	}
 	tx, err := u.txRepo.NewTransaction(false)
 	if err != nil {
 		return err
 	}
-	return u.markdownRepo.DeleteByPath(tx, md)
+	return u.markdownRepo.DeleteByPath(tx, md.Path)
 }
 
 /*
@@ -106,6 +136,14 @@ func (u *MarkdownInteractor) FindAll() ([]*models.MarkdownMemo, error) {
 }
 
 func (u *MarkdownInteractor) FindByTitle(title string) ([]*models.MarkdownMemo, error) {
+	md := models.NewMarkdownMemo(title, "", "")
+	err := validation.ValidateStruct(
+		md,
+		validation.Field(&md.Title, validation.Required.Error("タイトルは必須入力です"), validation.Length(1, 255)),
+	)
+	if err != nil {
+		return nil, err
+	}
 	tx, err := u.txRepo.NewTransaction(false)
 	if err != nil {
 		return nil, err
@@ -118,6 +156,14 @@ func (u *MarkdownInteractor) FindByTitle(title string) ([]*models.MarkdownMemo, 
 }
 
 func (u *MarkdownInteractor) FindByPath(path string) ([]*models.MarkdownMemo, error) {
+	md := models.NewMarkdownMemo("", path, "")
+	err := validation.ValidateStruct(
+		md,
+		validation.Field(&md.Path, validation.Required.Error("ファイルパスが存在しません"), validation.Length(1, 255)),
+	)
+	if err != nil {
+		return nil, err
+	}
 	tx, err := u.txRepo.NewTransaction(false)
 	if err != nil {
 		return nil, err
@@ -130,11 +176,23 @@ func (u *MarkdownInteractor) FindByPath(path string) ([]*models.MarkdownMemo, er
 }
 
 func (u *MarkdownInteractor) FindById(idStr string) (*models.MarkdownMemo, error) {
+	err := validation.Validate(idStr,
+		validation.Required, // not empty
+		is.Int,
+	)
+	if err != nil {
+		//独自エラーを返す
+		return nil, err
+	}
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		//独自エラーを返す
 		return nil, err
 	}
+	err = validation.Validate(id,
+		validation.Required, // not empty
+		is.Int,
+	)
 	tx, err := u.txRepo.NewTransaction(false)
 	if err != nil {
 		return nil, err
@@ -181,7 +239,7 @@ func (u *MarkdownInteractor) DeleteIfNotExistsByPath() error {
 		if err != nil {
 			if os.IsNotExist(err) {
 				log.Println(fmt.Sprintf("delete data: %s", md.Path))
-				err := u.markdownRepo.DeleteByPath(tx, md)
+				err := u.markdownRepo.DeleteByPath(tx, md.Path)
 				if err != nil {
 					return err
 				}
@@ -194,7 +252,7 @@ func (u *MarkdownInteractor) DeleteIfNotExistsByPath() error {
 			}
 			if info.IsDir() {
 				log.Println(fmt.Sprintf("delete data: %s", md.Path))
-				err := u.markdownRepo.DeleteByPath(tx, md)
+				err := u.markdownRepo.DeleteByPath(tx, md.Path)
 				if err != nil {
 					return err
 				}
@@ -208,8 +266,14 @@ func (u *MarkdownInteractor) DeleteIfNotExistsByPath() error {
 
 //searchコマンドで実行
 func (u *MarkdownInteractor) SearchByTitle(title string) ([]*models.MarkdownMemo, error) {
-	if title == "" {
-		return nil, errors.New("title is empty")
+	err := validation.Validate(title,
+		validation.Required, // not empty
+		validation.Length(1, 255),
+		is.Alphanumeric,
+	)
+	if err != nil {
+		//独自エラーを返す
+		return nil, err
 	}
 	tx, err := u.txRepo.NewTransaction(false)
 	if err != nil {
@@ -223,8 +287,14 @@ func (u *MarkdownInteractor) SearchByTitle(title string) ([]*models.MarkdownMemo
 }
 
 func (u *MarkdownInteractor) SearchByBody(bodyStr string) ([]*models.MarkdownMemo, map[string][]string, error) {
-	if bodyStr == "" {
-		return nil, nil, errors.New("body is empty")
+	err := validation.Validate(bodyStr,
+		validation.Required, // not empty
+		validation.Length(1, 255),
+		is.Alphanumeric,
+	)
+	if err != nil {
+		//独自エラーを返す
+		return nil, nil, err
 	}
 	tx, err := u.txRepo.NewTransaction(false)
 	if err != nil {
@@ -327,7 +397,7 @@ func addFileToZip(zipWriter *zip.Writer, file string) error {
 
 //ファイルを一箇所に集めるためにzip化
 func (u *MarkdownInteractor) CreateZipFile(mds []*models.MarkdownMemo) error {
-	if len(mds) == 0 {
+	if len(mds) == 0 || mds == nil {
 		return errors.New("no data")
 	}
 

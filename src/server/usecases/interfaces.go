@@ -29,8 +29,8 @@ type TransactionRepo interface {
 type MarkdownRepo interface {
 	Create(tx Transaction, md *models.MarkdownMemo) error
 	Delete(tx Transaction, md *models.MarkdownMemo) error
-	DeleteByTitle(tx Transaction, md *models.MarkdownMemo) error
-	DeleteByPath(tx Transaction, md *models.MarkdownMemo) error
+	DeleteByTitle(tx Transaction, title string) error
+	DeleteByPath(tx Transaction, path string) error
 	Update(tx Transaction, md *models.MarkdownMemo) error
 	FindById(tx Transaction, id int) (*models.MarkdownMemo, error)
 	FindAll(tx Transaction) ([]*models.MarkdownMemo, error)

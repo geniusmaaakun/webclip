@@ -57,7 +57,11 @@ func Download(c *cli.Context) error {
 
 	//save to DB
 	if c.Bool("save") {
-		db, err := models.NewDB()
+		folderPath, err := models.GetDatabasePath()
+		if err != nil {
+			log.Fatalf("SaveDatabase: %v\n", err)
+		}
+		db, err := models.NewDB(filepath.Join(folderPath, "webclip.sql"))
 		if err != nil {
 			log.Fatalf("SaveDatabase: %v\n", err)
 		}

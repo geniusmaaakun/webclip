@@ -3,6 +3,7 @@ package actions
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 	"webclip/src/server/models"
 	"webclip/src/server/models/rdb"
 	"webclip/src/server/usecases"
@@ -18,10 +19,11 @@ func Search(c *cli.Context) error {
 		return nil
 	}
 
-	db, err := models.NewDB()
+	folderPath, err := models.GetDatabasePath()
 	if err != nil {
-		log.Fatalf("SearchDatabase: %v\n", err)
+		log.Fatalf("SaveDatabase: %v\n", err)
 	}
+	db, err := models.NewDB(filepath.Join(folderPath, "webclip.sql"))
 	markdownRepo := rdb.NewMarkdownRepo()
 	txRepo := rdb.NewTransactionManager(db)
 	markdownUsecase := usecases.NewMarkdownInteractor(txRepo, markdownRepo)
