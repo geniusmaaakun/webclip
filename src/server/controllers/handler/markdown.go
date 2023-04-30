@@ -49,10 +49,10 @@ func (m *MarkdownMemo) ConvertFrom(md *models.MarkdownMemo) error {
 }
 
 type MarkdownHandler struct {
-	MarkdownInteractor *usecases.MarkdownInteractor
+	MarkdownInteractor usecases.MarkdownUsecase
 }
 
-func NewMarkdownHandler(i *usecases.MarkdownInteractor) *MarkdownHandler {
+func NewMarkdownHandler(i usecases.MarkdownUsecase) *MarkdownHandler {
 	return &MarkdownHandler{MarkdownInteractor: i}
 }
 

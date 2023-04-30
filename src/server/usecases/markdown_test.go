@@ -776,6 +776,7 @@ func TestCreateZipFile(t *testing.T) {
 	}
 
 	//unzip
+	//解凍したものを書き込む
 	// zip化されたtxtファイルを読み込む
 	//https://zenn.dev/ohnishi/articles/a2b7bbd9c1abf7
 	zr, err := zip.OpenReader("webclip.zip")
@@ -810,3 +811,65 @@ func TestCreateZipFile(t *testing.T) {
 		defer reader.Close()
 	}
 }
+
+//権限とかでテストが通らない
+/*
+// unZip zipファイルを展開する
+func unZip(src, dest string) error {
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	ext := filepath.Ext(src)
+	rep := regexp.MustCompile(ext + "$")
+	dir := filepath.Base(rep.ReplaceAllString(src, ""))
+
+	destDir := filepath.Join(dest, dir)
+	// ファイル名のディレクトリを作成する
+	if err := os.MkdirAll(destDir, os.ModeDir); err != nil {
+		return err
+	}
+
+	for _, f := range r.File {
+		if f.Mode().IsDir() {
+			// ディレクトリは無視して構わない
+			continue
+		}
+		if err := saveUnZipFile(destDir, *f); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// saveUnZipFile 展開したZipファイルをそのままローカルに保存する
+func saveUnZipFile(destDir string, f zip.File) error {
+	// 展開先のパスを設定する
+	destPath := filepath.Join(destDir, f.Name)
+	// 子孫ディレクトリがあれば作成する
+	if err := os.MkdirAll(filepath.Dir(destPath), f.Mode()); err != nil {
+		return err
+	}
+	// Zipファイルを開く
+	rc, err := f.Open()
+	if err != nil {
+		return err
+	}
+	defer rc.Close()
+	// 展開先ファイルを作成する
+	destFile, err := os.Create(destPath)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+	// 展開先ファイルに書き込む
+	if _, err := io.Copy(destFile, rc); err != nil {
+		return err
+	}
+
+	return nil
+}
+*/

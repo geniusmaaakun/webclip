@@ -38,12 +38,27 @@ type markdownUsecase interface {
 }
 */
 
+type MarkdownUsecase interface {
+	Create(title, path, srcUrl string) error
+	Delete(title string) error
+	DeleteByPath(path string) error
+	//DeleteById(id int) error
+	FindAll() ([]*models.MarkdownMemo, error)
+	FindByTitle(title string) ([]*models.MarkdownMemo, error)
+	FindByPath(path string) ([]*models.MarkdownMemo, error)
+	FindById(idStr string) (*models.MarkdownMemo, error)
+	DeleteIfNotExistsByPath() error
+	SearchByTitle(title string) ([]*models.MarkdownMemo, error)
+	SearchByBody(bodyStr string) ([]*models.MarkdownMemo, map[string][]string, error)
+	CreateZipFile(mds []*models.MarkdownMemo) error
+}
+
 type MarkdownInteractor struct {
 	txRepo       TransactionRepo
 	markdownRepo MarkdownRepo
 }
 
-func NewMarkdownInteractor(txRepo TransactionRepo, mdRepo MarkdownRepo) *MarkdownInteractor {
+func NewMarkdownInteractor(txRepo TransactionRepo, mdRepo MarkdownRepo) MarkdownUsecase {
 	return &MarkdownInteractor{txRepo: txRepo, markdownRepo: mdRepo}
 }
 
