@@ -1,7 +1,17 @@
 NAME = webclip
 
 # ディレクトリを作成し、DBを作成する。ルートに作成
-install: 
+goinstall: 
+	go install
+
+
+# OSによって配置場所を変える
+#install: build
+#	cp $(NAME) /usr/local/bin/$(NAME)
+
+build:
+	go build -o $(NAME) main.go
+
 
 test: 
 	go test ./src/actions -v
