@@ -45,6 +45,7 @@ func (m *MarkdownMemo) ConvertFrom(md *models.MarkdownMemo) error {
 	m.Path = md.Path
 	m.SrcUrl = md.SrcUrl
 	m.CreatedAt = md.CreatedAt
+
 	return nil
 }
 
@@ -71,7 +72,13 @@ func (h *MarkdownHandler) ListAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonData)
+	_, err = w.Write(jsonData)
+	if err != nil {
+		//独自エラーを返す
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
 
 //Idで取得？
@@ -102,7 +109,15 @@ func (h *MarkdownHandler) GetById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	markdown := &MarkdownMemo{}
-	markdown.ConvertFrom(md)
+	err = markdown.ConvertFrom(md)
+	if err != nil {
+		//独自エラーを返す
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	//fmt.Println(markdown)
+	//fmt.Println(md)
 
 	//jsonで返す
 	jsonData, err := json.Marshal(markdown)
@@ -112,7 +127,12 @@ func (h *MarkdownHandler) GetById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(jsonData)
+	_, err = w.Write(jsonData)
+	if err != nil {
+		//独自エラーを返す
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 }
 
