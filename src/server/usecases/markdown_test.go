@@ -1,12 +1,16 @@
 package usecases_test
 
 import (
+	"archive/zip"
+	"bytes"
 	"crypto/md5"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"webclip/src/server/models"
 	"webclip/src/server/models/rdb"
@@ -207,7 +211,7 @@ func TestFindAll(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		io.WriteString(h, fmt.Sprintf("test%d", i))
 		s := fmt.Sprintf("%x", h.Sum(nil))
-		t.Log(s)
+		//t.Log(s)
 		err := markdownUsecase.Create(fmt.Sprintf("test%s", string(s)), fmt.Sprintf("/test%s/test%s", string(s), string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s)))
 		if err != nil {
 			t.Errorf("MarkdownInteractor.Delete() error = got %v, s value = %s\n", err, string(s))
@@ -257,7 +261,7 @@ func TestFindByTitle(t *testing.T) {
 		h := md5.New()
 		io.WriteString(h, fmt.Sprintf("test%d", i))
 		s := fmt.Sprintf("%x", h.Sum(nil))
-		t.Log(s)
+		//t.Log(s)
 		tests = append(tests, struct {
 			name      string
 			args      args
@@ -327,7 +331,7 @@ func TestFindById(t *testing.T) {
 		h := md5.New()
 		io.WriteString(h, fmt.Sprintf("test%d", i))
 		s := fmt.Sprintf("%x", h.Sum(nil))
-		t.Log(s)
+		//t.Log(s)
 		tests = append(tests, struct {
 			id        int
 			name      string
@@ -394,7 +398,7 @@ func TestFindByPath(t *testing.T) {
 		h := md5.New()
 		io.WriteString(h, fmt.Sprintf("test%d", i))
 		s := fmt.Sprintf("%x", h.Sum(nil))
-		t.Log(s)
+		//t.Log(s)
 		tests = append(tests, struct {
 			name     string
 			args     args
@@ -475,7 +479,7 @@ func TestDeleteIfNotExistsByPath(t *testing.T) {
 		h := md5.New()
 		io.WriteString(h, fmt.Sprintf("test%d", i))
 		s := fmt.Sprintf("%x", h.Sum(nil))
-		t.Log(s)
+		//t.Log(s)
 		tests = append(tests, struct {
 			name     string
 			args     args
@@ -484,18 +488,6 @@ func TestDeleteIfNotExistsByPath(t *testing.T) {
 		err := markdownUsecase.Create(fmt.Sprintf("test%s", string(s)), fmt.Sprintf("test%s/test%s", string(s), string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s)))
 		if err != nil {
 			t.Errorf("MarkdownInteractor.Delete() error = got %v, s value = %s\n", err, string(s))
-		}
-		//go test src/server/usecases -update
-		if *update {
-			os.MkdirAll(filepath.Join("testdata", string(s)), 0777)
-			file, err := os.Create(filepath.Join("testdata", string(s), "README.md"))
-			if err != nil {
-				t.Fatal(err)
-			}
-			_, err = io.WriteString(file, fmt.Sprintf("%stest%d%s", string(s), i, string(s)))
-			if err != nil {
-				t.Fatal(err)
-			}
 		}
 	}
 
@@ -532,7 +524,7 @@ func TestDeleteIfNotExistsByPath(t *testing.T) {
 	}
 }
 
-/*
+//go test src/server/usecases -update
 //先に追加しておき、その後に取得して一致するかどうか
 func TestSearchByTitle(t *testing.T) {
 	//ここら辺はmockにする
@@ -551,24 +543,49 @@ func TestSearchByTitle(t *testing.T) {
 		srcUrl string
 	}
 
-	//testcaseの作成
-	tests := []struct {
-		name string
-		args args
-		want bool //インスタンスを返す様にcreateを変更する？
-	}{
-		{"normal 1", args{"test1", "/test1/test1", "http://test1/test1"}, true},
-		{"fail SrcURL = isNotURL", args{"test2", "/test2/test2", "test1/test1"}, false},
-		{"fail title = isEmpty", args{"", "/test2/test2", "test1/test1"}, false},
-		{"fail path = isEmpty", args{"test3", "", "test1/test1"}, false},
-		{"fail srcUrl = isEmpty", args{"test4", "test4", ""}, false},
-		{"fail allField = isEmpty", args{"", "", ""}, false},
-	}
-
 	defer t.Cleanup(func() {
 		//テスト用のDBを削除
 		os.Remove("webclip.sql")
 	})
+
+	//testcaseの作成
+	tests := []struct {
+		name      string
+		args      args
+		wantTitle string //インスタンスを返す様にcreateを変更する？
+	}{}
+
+	if *update {
+		os.RemoveAll("testdata")
+	}
+
+	for i := 0; i < 100; i++ {
+		h := md5.New()
+		io.WriteString(h, fmt.Sprintf("test%d", i))
+		s := fmt.Sprintf("%x", h.Sum(nil))
+		//t.Log(s)
+		tests = append(tests, struct {
+			name      string
+			args      args
+			wantTitle string
+		}{fmt.Sprintf("normal %d", i), args{fmt.Sprintf("test%s", string(s)), fmt.Sprintf("test%s/test%s", string(s), string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s))}, fmt.Sprintf("test%s", string(s))})
+		err := markdownUsecase.Create(fmt.Sprintf("test%s", string(s)), fmt.Sprintf("test%s/test%s", string(s), string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s)))
+		if err != nil {
+			t.Errorf("MarkdownInteractor.Delete() error = got %v, s value = %s\n", err, string(s))
+		}
+		//go test src/server/usecases -update
+		if *update {
+			os.MkdirAll(filepath.Join("testdata", string(s)), 0777)
+			file, err := os.OpenFile(filepath.Join("testdata", string(s), "README.md"), os.O_RDWR|os.O_CREATE, 0666)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = io.WriteString(file, fmt.Sprintf("%stest%d%s", string(s), i, string(s)))
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
 
 	//usecaseの実行
 	for _, tt := range tests {
@@ -576,12 +593,21 @@ func TestSearchByTitle(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			mds, err := markdownUsecase.SearchByTitle(tt.args.title)
+			if err != nil {
+				t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+			}
+			if len(mds) != 1 {
+				t.Errorf("MarkdownInteractor.Delete() error = got %v\n", len(mds))
+			}
+			if mds[0].Title != tt.wantTitle {
+				t.Errorf("MarkdownInteractor.Delete() error = got %v\n", mds[0].Title)
+			}
+
 		})
 	}
 }
-*/
 
-/*
 //先に追加しておき、その後に取得して一致するかどうか testdata
 func TestSearchByBody(t *testing.T) {
 	//ここら辺はmockにする
@@ -600,24 +626,51 @@ func TestSearchByBody(t *testing.T) {
 		srcUrl string
 	}
 
-	//testcaseの作成
-	tests := []struct {
-		name string
-		args args
-		want bool //インスタンスを返す様にcreateを変更する？
-	}{
-		{"normal 1", args{"test1", "/test1/test1", "http://test1/test1"}, true},
-		{"fail SrcURL = isNotURL", args{"test2", "/test2/test2", "test1/test1"}, false},
-		{"fail title = isEmpty", args{"", "/test2/test2", "test1/test1"}, false},
-		{"fail path = isEmpty", args{"test3", "", "test1/test1"}, false},
-		{"fail srcUrl = isEmpty", args{"test4", "test4", ""}, false},
-		{"fail allField = isEmpty", args{"", "", ""}, false},
-	}
-
 	defer t.Cleanup(func() {
 		//テスト用のDBを削除
 		os.Remove("webclip.sql")
 	})
+
+	//testcaseの作成
+	tests := []struct {
+		id        int
+		name      string
+		args      args
+		wantTitle string //インスタンスを返す様にcreateを変更する？
+	}{}
+
+	if *update {
+		os.RemoveAll("testdata")
+	}
+
+	for i := 0; i < 100; i++ {
+		h := md5.New()
+		io.WriteString(h, fmt.Sprintf("test%d", i))
+		s := fmt.Sprintf("%x", h.Sum(nil))
+		//t.Log(s)
+		tests = append(tests, struct {
+			id        int
+			name      string
+			args      args
+			wantTitle string
+		}{i, fmt.Sprintf("normal %d", i), args{fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s))}, fmt.Sprintf("test%s", string(s))})
+		err := markdownUsecase.Create(fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s)))
+		if err != nil {
+			t.Errorf("MarkdownInteractor.Delete() error = got %v, s value = %s\n", err, string(s))
+		}
+		//go test src/server/usecases -update
+		if *update {
+			os.MkdirAll(filepath.Join("testdata", string(s)), 0777)
+			file, err := os.OpenFile(filepath.Join("testdata", string(s), "README.md"), os.O_RDWR|os.O_CREATE, 0666)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = io.WriteString(file, fmt.Sprintf("%stest%d%s", string(s), i, string(s)))
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
 
 	//usecaseの実行
 	for _, tt := range tests {
@@ -625,11 +678,26 @@ func TestSearchByBody(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
+			mds, bodys, err := markdownUsecase.SearchByBody(fmt.Sprintf("test%d", tt.id))
+			if err != nil {
+				t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+			}
+			if len(mds) < 1 {
+				t.Errorf("MarkdownInteractor.Delete() error = got %v\n", len(mds))
+			}
+
+			for _, md := range mds {
+				for _, line := range bodys[md.Path] {
+					if !strings.Contains(line, fmt.Sprintf("test%d", tt.id)) {
+						t.Errorf("MarkdownInteractor.Delete() error = got %v\n", bodys[tt.args.path])
+					}
+				}
+			}
 		})
 	}
 }
 
-//testdataのファイルをzipにして、それを解凍して、その中身を取得して一致するかどうか
+//testdataのファイルをzipにして、それをunzip解凍して、その中身のファイル名、中身を取得して一致するかどうか
 func TestCreateZipFile(t *testing.T) {
 	//ここら辺はmockにする
 	//dbの作成
@@ -647,32 +715,98 @@ func TestCreateZipFile(t *testing.T) {
 		srcUrl string
 	}
 
-	//testcaseの作成
-	tests := []struct {
-		name string
-		args args
-		want bool //インスタンスを返す様にcreateを変更する？
-	}{
-		{"normal 1", args{"test1", "/test1/test1", "http://test1/test1"}, true},
-		{"fail SrcURL = isNotURL", args{"test2", "/test2/test2", "test1/test1"}, false},
-		{"fail title = isEmpty", args{"", "/test2/test2", "test1/test1"}, false},
-		{"fail path = isEmpty", args{"test3", "", "test1/test1"}, false},
-		{"fail srcUrl = isEmpty", args{"test4", "test4", ""}, false},
-		{"fail allField = isEmpty", args{"", "", ""}, false},
-	}
-
 	defer t.Cleanup(func() {
 		//テスト用のDBを削除
 		os.Remove("webclip.sql")
+		os.Remove("webclip.zip")
 	})
 
-	//usecaseの実行
-	for _, tt := range tests {
-		tt := tt
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
+	//testcaseの作成
+	tests := []struct {
+		id        int
+		name      string
+		args      args
+		wantTitle string //インスタンスを返す様にcreateを変更する？
+	}{}
 
-		})
+	if *update {
+		os.RemoveAll("testdata")
+	}
+
+	for i := 0; i < 100; i++ {
+		h := md5.New()
+		io.WriteString(h, fmt.Sprintf("test%d", i))
+		s := fmt.Sprintf("%x", h.Sum(nil))
+		//t.Log(s)
+		tests = append(tests, struct {
+			id        int
+			name      string
+			args      args
+			wantTitle string
+		}{i, fmt.Sprintf("normal %d", i), args{fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s))}, fmt.Sprintf("test%s", string(s))})
+		err := markdownUsecase.Create(fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s)))
+		if err != nil {
+			t.Errorf("MarkdownInteractor.Delete() error = got %v, s value = %s\n", err, string(s))
+		}
+		//go test src/server/usecases -update
+		if *update {
+			os.MkdirAll(filepath.Join("testdata", string(s)), 0777)
+			file, err := os.OpenFile(filepath.Join("testdata", string(s), "README.md"), os.O_RDWR|os.O_CREATE, 0666)
+			if err != nil {
+				t.Fatal(err)
+			}
+			_, err = io.WriteString(file, fmt.Sprintf("%stest%d%s", string(s), i, string(s)))
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+
+	//usecaseの実行
+
+	mds, err := markdownUsecase.FindAll()
+	if err != nil {
+		t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+	}
+
+	//testdataをzip化
+	err = markdownUsecase.CreateZipFile(mds)
+	if err != nil {
+		t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+	}
+
+	//unzip
+	// zip化されたtxtファイルを読み込む
+	//https://zenn.dev/ohnishi/articles/a2b7bbd9c1abf7
+	zr, err := zip.OpenReader("webclip.zip")
+	if err != nil {
+		t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+	}
+
+	defer zr.Close()
+
+	for _, zfile := range zr.File {
+		reader, err := zfile.Open()
+		if err != nil {
+			t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+		}
+
+		got, err := ioutil.ReadAll(reader)
+		if err != nil {
+			t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+		}
+
+		//bodyの中身がtestdataの中身と一致するかどうか
+		want, err := ioutil.ReadFile(filepath.Join("testdata", filepath.Dir(zfile.Name), filepath.Base(zfile.Name)))
+
+		if err != nil {
+			t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+		}
+
+		if !bytes.Equal(got, want) {
+			t.Errorf("MarkdownInteractor.Delete() error = got %v\n", err)
+		}
+
+		defer reader.Close()
 	}
 }
-*/
