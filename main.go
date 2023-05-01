@@ -34,8 +34,8 @@ func main() {
 				Usage:   "Download images",
 			},
 			&cli.BoolFlag{
-				Name:    "db",
-				Aliases: []string{"save"},
+				Name:    "save",
+				Aliases: []string{"sv"},
 				Usage:   "Save to DB",
 			},
 		},

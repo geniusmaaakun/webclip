@@ -138,7 +138,7 @@ func TestFindById(t *testing.T) {
 			name      string
 			args      args
 			wantTitle string
-		}{i, fmt.Sprintf("normal %d", i), args{fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s))}, fmt.Sprintf("test%s", string(s))})
+		}{i + 1, fmt.Sprintf("normal %d", i), args{fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s))}, fmt.Sprintf("test%s", string(s))})
 		err := markdownUsecase.Create(fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s)))
 		if err != nil {
 			t.Errorf("MarkdownInteractor.Delete() error = got %v, s value = %s\n", err, string(s))
@@ -149,47 +149,65 @@ func TestFindById(t *testing.T) {
 	router := mux.NewRouter()
 	router.HandleFunc("/api/markdowns/{id}", srv.GetById).Methods("GET")
 
-	req, _ := http.NewRequest("GET", "http://localhost/api/markdowns/1", nil)
-	res := httptest.NewRecorder()
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			url := fmt.Sprintf("http://localhost/api/markdowns/%d", tt.id)
 
-	router.ServeHTTP(res, req)
+			t.Log(url)
 
-	// Assertion
-	// http.Clientなどで受け取ったhttp.Responseを検証するときとほぼ変わらない
-	if res.Code != http.StatusOK {
-		t.Errorf("want %d, but %d", http.StatusOK, res.Code)
-	}
+			req, _ := http.NewRequest("GET", url, nil)
+			res := httptest.NewRecorder()
 
-	want := `{"id":1,"title":"testf6f4061a1bddc1c04d8109b39f581270","content":"f6f4061a1bddc1c04d8109b39f581270test0f6f4061a1bddc1c04d8109b39f581270","path":"testdata/f6f4061a1bddc1c04d8109b39f581270/README.md","src_url":"http://testf6f4061a1bddc1c04d8109b39f581270/testf6f4061a1bddc1c04d8109b39f581270"}`
+			router.ServeHTTP(res, req)
 
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
-	}
+			// Assertion
+			// http.Clientなどで受け取ったhttp.Responseを検証するときとほぼ変わらない
+			if res.Code != http.StatusOK {
+				t.Errorf("want %d, but %d", http.StatusOK, res.Code)
+			}
 
-	// Bodyは*bytes.Buffer型なので文字列の比較は少しラク
-	gotData := &handler.MarkdownMemo{}
-	err = json.Unmarshal(body, &gotData)
-	if err != nil {
-		t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
-	}
+			// Bodyは*bytes.Buffer型なので文字列の比較は少しラク
+			gotData := &handler.MarkdownMemo{}
 
-	wantData := &handler.MarkdownMemo{}
-	err = json.Unmarshal([]byte(want), &wantData)
-	if err != nil {
-		t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
-	}
+			err = json.NewDecoder(res.Body).Decode(&gotData)
+			if err != nil {
+				t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
+			}
 
-	if gotData.Title != wantData.Title {
-		t.Errorf("want %s, but %s", wantData.Title, gotData.Title)
-	}
+			tx, err := txRepo.NewTransaction(false)
+			if err != nil {
+				t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
+			}
 
-	if gotData.Content != wantData.Content {
-		t.Errorf("want %s, but %s", wantData.Content, gotData.Content)
-	}
+			wantData, err := markdownRepo.FindById(tx, tt.id)
+			if err != nil {
+				t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
+			}
 
-	if gotData.Path != wantData.Path {
-		t.Errorf("want %s, but %s", wantData.Path, gotData.Path)
+			file, err := os.Open(wantData.Path)
+			if err != nil {
+				t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
+			}
+			defer file.Close()
+			wantContent, err := ioutil.ReadAll(file)
+			if err != nil {
+				t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
+			}
+
+			if gotData.Title != wantData.Title {
+				t.Errorf("want %s, but %s", wantData.Title, gotData.Title)
+			}
+
+			if gotData.Content != string(wantContent) {
+				t.Errorf("want %s, but %s", string(wantContent), gotData.Content)
+			}
+
+			if gotData.Path != wantData.Path {
+				t.Errorf("want %s, but %s", wantData.Path, gotData.Path)
+			}
+		})
 	}
 
 }

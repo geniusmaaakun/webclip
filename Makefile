@@ -5,7 +5,7 @@ goinstall:
 	go install
 
 
-# OSによって配置場所を変える
+# OSによって配置場所を変える。手動で変更するマニュアルをREADMEに記載する
 #install: build
 #	cp $(NAME) /usr/local/bin/$(NAME)
 
