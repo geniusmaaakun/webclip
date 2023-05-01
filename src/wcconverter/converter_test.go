@@ -2,10 +2,10 @@ package wcconverter_test
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 	"webclip/src/wcconverter"
@@ -20,18 +20,14 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 // htmlを変換
 
 func TestConvertFromHTML(t *testing.T) {
-	go func() {
-		err := http.ListenAndServe(":8090", http.HandlerFunc(ImageHandler))
-		if err != nil {
-			fmt.Println(err)
-		}
-	}()
+	sv := httptest.NewServer(http.HandlerFunc(ImageHandler))
+
 	//w := httptest.NewRequest("GET", "http://example.com", nil)
 
 	defer t.Cleanup(func() {
 		os.RemoveAll(t.TempDir())
 	})
-	downloader := wcdownloader.NewDownloader("http://localhost:8090", t.TempDir(), true)
+	downloader := wcdownloader.NewDownloader(sv.URL, t.TempDir(), true)
 	doc, err := downloader.HtmlDownloader.CreateDocument()
 	if err != nil {
 		t.Fatal(err)

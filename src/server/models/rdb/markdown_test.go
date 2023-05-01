@@ -2,7 +2,6 @@ package rdb_test
 
 import (
 	"os"
-	"path/filepath"
 	"strconv"
 	"testing"
 	"webclip/src/server/models"
@@ -87,13 +86,8 @@ func TestCreateMd(t *testing.T) {
 	}
 
 	defer t.Cleanup(func() {
-		folderPath, err := models.GetDatabasePath()
-		if err != nil {
-			t.Fatalf("SaveDatabase: %v\n", err)
-		}
-		t.Log(folderPath)
 		//テスト用のDBを削除
-		os.RemoveAll(filepath.Join(folderPath))
+		os.Remove("webclip.sql")
 	})
 
 	for _, tt := range tests {

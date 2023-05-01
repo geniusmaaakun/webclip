@@ -1,10 +1,10 @@
 package wcdownloader_test
 
 import (
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,9 +18,10 @@ func SimpleHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TestDownloadImageFalse(t *testing.T) {
-	go func() { http.ListenAndServe(":8080", http.HandlerFunc(SimpleHandler)) }()
+	sv := httptest.NewServer(http.HandlerFunc(SimpleHandler))
+
 	//w := httptest.NewRequest("GET", "http://example.com", nil)
-	downloader := wcdownloader.NewDownloader("http://localhost:8080", "test", false)
+	downloader := wcdownloader.NewDownloader(sv.URL, "test", false)
 	doc, err := downloader.HtmlDownloader.CreateDocument()
 	if err != nil {
 		t.Fatal(err)
@@ -31,7 +32,7 @@ func TestDownloadImageFalse(t *testing.T) {
 	}
 
 	if strings.Compare("Hello from handler!\n", doc.Selection.Find("h1").Text()) != 0 {
-		t.Fatal("invalid html")
+		t.Fatalf("invalid html: %s", doc.Selection.Find("h1").Text())
 	}
 }
 
@@ -42,18 +43,14 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 
 //imageタグ
 func TestDownloadImageTrue(t *testing.T) {
-	go func() {
-		err := http.ListenAndServe(":8090", http.HandlerFunc(ImageHandler))
-		if err != nil {
-			fmt.Println(err)
-		}
-	}()
+	sv := httptest.NewServer(http.HandlerFunc(ImageHandler))
+
 	//w := httptest.NewRequest("GET", "http://example.com", nil)
 
 	defer t.Cleanup(func() {
 		os.RemoveAll(t.TempDir())
 	})
-	downloader := wcdownloader.NewDownloader("http://localhost:8090", t.TempDir(), true)
+	downloader := wcdownloader.NewDownloader(sv.URL, t.TempDir(), true)
 	doc, err := downloader.HtmlDownloader.CreateDocument()
 	if err != nil {
 		t.Fatal(err)
