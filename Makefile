@@ -12,6 +12,9 @@ goinstall:
 build:
 	go build -o $(NAME) main.go
 
+#クロスコンパイル
+#https://qiita.com/Utr/items/9469c1611abe8a0a3486
+#env GOOS=linux GOARCH=amd64 go build main.go（buildするファイル名）
 
 test: 
 	go test ./src/actions -v
