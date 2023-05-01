@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"webclip/src/actions"
@@ -117,121 +119,62 @@ func ImageHandler(w http.ResponseWriter, r *http.Request) {
 
 func TestDownload(t *testing.T) {
 	//テストサーバー
-	go func() {
-		err := http.ListenAndServe(":8090", http.HandlerFunc(ImageHandler))
-		if err != nil {
-			fmt.Println(err)
-		}
-	}()
-
-	defer t.Cleanup(func() {
-		//テスト用のDBを削除
-		os.Remove("webclip.sql")
-	})
+	sv := httptest.NewServer(http.HandlerFunc(ImageHandler))
+	defer sv.Close()
 
 	c := &cli.Context{
-		App: &cli.App{
-			Name:  "HTML to Markdown converter",
-			Usage: "Convert HTML files to Markdown with optional image downloading",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:    "url",
-					Aliases: []string{"u"},
-					Usage:   "Target URL",
-					//Required: true,
-				},
-				&cli.StringFlag{
-					Name:    "outdir",
-					Aliases: []string{"o"},
-					Usage:   "Output directory",
-					//Required: true,
-				},
-				&cli.BoolFlag{
-					Name:    "download",
-					Aliases: []string{"d"},
-					Usage:   "Download images",
-				},
-				&cli.BoolFlag{
-					Name:    "save",
-					Aliases: []string{"sv"},
-					Usage:   "Save to DB",
-				},
-			},
-			//WebClip
-			Action: actions.Download,
-		},
+		App: actions.NewWebClip("webclip.sql"),
 	}
-
-	//すべてのファイルを削除する　危険
-
-	c.App.Commands = []*cli.Command{
-		//sub command : webclip server
-		{
-			Name:   "server",
-			Usage:  "Start Web Server",
-			Action: actions.Server,
-		},
-		//sub command : webclip clean
-		{
-			Name:   "clean",
-			Usage:  "clean database if file is not exist",
-			Action: actions.Clean,
-		},
-		//sub command : webclip search
-		{
-			Name:  "search",
-			Usage: "search markdown file",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:    "title",
-					Aliases: []string{"t"},
-					Usage:   "search title",
-				},
-				&cli.StringFlag{
-					Name:    "body",
-					Aliases: []string{"b"},
-					Usage:   "search body",
-				},
-			},
-			Action: actions.Search,
-		},
-		//zip化する
-		//sub command : webclip zip
-		{
-			Name:  "zip",
-			Usage: "zip markdown file",
-			Flags: []cli.Flag{
-				&cli.StringFlag{
-					Name:    "title",
-					Aliases: []string{"t"},
-					Usage:   "search title",
-				},
-				&cli.StringFlag{
-					Name:    "body",
-					Aliases: []string{"b"},
-					Usage:   "search body",
-				},
-			},
-			Action: actions.Zip,
-		},
-	}
-
-	/*
-		defer func() {
-			//すべてのファイルを削除する　危険
-			os.RemoveAll("./testdata/")
-		}()
-	*/
 
 	//テスト用のコマンドライン引数
 	//args := []string{"", "-u", "http://localhost:8090", "-o", "./testdata", "--download", "--save"}
-	args := []string{"", "-u", "http://localhost:8090", "-o", "./testdata", "--download"}
+	args := []string{"", "-u", sv.URL, "-o", "./testdata", "--download"}
 
 	//テスト実行
-	err := c.App.Run(args)
-	assert.NoError(t, err)
+	got := extractStdout(t, c, args)
 
 	//出力が一致しているか
+	assert.Equal(t, fmt.Sprintf("Target: %s", sv.URL), got)
 
 	//ファイルが一致しているか？
+	files, err := filepath.Glob("./testdata/*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedFiles := []string{"testdata/README.md", "testdata/test.html", "testdata/testdata-1.jpe", "testdata/testdata-10.png", "testdata/testdata-11.png", "testdata/testdata-12.png", "testdata/testdata-13.png", "testdata/testdata-14.png", "testdata/testdata-15.png", "testdata/testdata-16.png", "testdata/testdata-17.png", "testdata/testdata-18.png", "testdata/testdata-19.png", "testdata/testdata-2.png", "testdata/testdata-20.png", "testdata/testdata-21.png", "testdata/testdata-22.png", "testdata/testdata-23.png", "testdata/testdata-24.png", "testdata/testdata-25.png", "testdata/testdata-26.png", "testdata/testdata-27.png", "testdata/testdata-28.png", "testdata/testdata-29.png", "testdata/testdata-3.svg", "testdata/testdata-30.jpe", "testdata/testdata-31.png", "testdata/testdata-32.jpe", "testdata/testdata-33.jpe", "testdata/testdata-34.svg", "testdata/testdata-4.png", "testdata/testdata-5.png", "testdata/testdata-6.png", "testdata/testdata-7.png", "testdata/testdata-8.png", "testdata/testdata-9.png"}
+
+	for i := range files {
+		if files[i] != expectedFiles[i] {
+			t.Errorf("file not match: %s", files[i])
+		}
+	}
+}
+
+func TestClean(t *testing.T) {
+
+	/*
+		app := &cli.Context{
+			App: actions.NewWebClip("webclip.sql"),
+		}
+
+		args := []string{"", "clean"}
+
+		//testdataDBの作成
+
+		//clean後に確認
+	*/
+
+}
+
+func TestSearch(t *testing.T) {
+
+}
+
+func TestZip(t *testing.T) {
+
+}
+
+func TestServer(t *testing.T) {
+
 }
