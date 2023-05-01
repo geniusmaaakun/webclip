@@ -2,8 +2,10 @@ package actions_test
 
 import (
 	"bytes"
+	"crypto/md5"
 	"fmt"
 	"html/template"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -11,11 +13,15 @@ import (
 	"strings"
 	"testing"
 	"webclip/src/actions"
+	"webclip/src/server/models"
+	"webclip/src/server/models/rdb"
+	"webclip/src/server/usecases"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/urfave/cli/v2"
 )
 
+//exampletestでもいい？
 // Stdoutに書き込まれた文字列を抽出する関数
 // (Stderrも同じ要領で出力先を変更できます)
 func extractStdout(t *testing.T, c *cli.Context, args []string) string {
@@ -48,6 +54,7 @@ func extractStdout(t *testing.T, c *cli.Context, args []string) string {
 	return strings.TrimRight(buf.String(), "\n")
 }
 
+/*
 func greet(c *cli.Context) error {
 	name := "world"
 
@@ -90,27 +97,17 @@ func TestGreet(t *testing.T) {
 
 	assert.Equal(t, "test\nHello, world!", got)
 
-	/*
+
 		// コマンドライン引数なしのテスト
-		err := app.Run([]string{"", "greet"})
-		assert.NoError(t, err)
-		assert.Equal(t, "Hello, world!\n", buf.String())
-		t.Log(errbuf.String())
-		t.Log(buf.String())
+		// err := app.Run([]string{"", "greet"})
+		// assert.NoError(t, err)
+		// assert.Equal(t, "Hello, world!\n", buf.String())
+		// t.Log(errbuf.String())
+		// t.Log(buf.String())
 
-	*/
 
-	// バッファをリセット
-	/*
-		buf.Reset()
-		errbuf.Reset()
-
-		// 名前引数付きのテスト
-		err = app.Run([]string{"", "greet", "Alice"})
-		assert.NoError(t, err)
-		assert.Equal(t, "Hello, Alice!\n", buf.String())
-	*/
 }
+*/
 
 func ImageHandler(w http.ResponseWriter, r *http.Request) {
 	t := template.Must(template.ParseFiles("./testdata/test.html"))
@@ -153,22 +150,80 @@ func TestDownload(t *testing.T) {
 
 func TestClean(t *testing.T) {
 
-	/*
-		app := &cli.Context{
-			App: actions.NewWebClip("webclip.sql"),
+	//ここら辺はmockにする
+	//dbの作成
+	db, err := models.NewDB("webclip.sql")
+	if err != nil {
+		t.Fatalf("database error: %v\n", err)
+	}
+	txRepo := rdb.NewTransactionManager(db)
+	markdownRepo := rdb.NewMarkdownRepo()
+	markdownUsecase := usecases.NewMarkdownInteractor(txRepo, markdownRepo)
+
+	type args struct {
+		title  string
+		path   string
+		srcUrl string
+	}
+
+	defer t.Cleanup(func() {
+		//テスト用のDBを削除
+		os.Remove("webclip.sql")
+	})
+
+	//testcaseの作成
+	tests := []struct {
+		id        int
+		name      string
+		args      args
+		wantTitle string //インスタンスを返す様にcreateを変更する？
+	}{}
+
+	for i := 0; i < 100; i++ {
+		h := md5.New()
+		io.WriteString(h, fmt.Sprintf("test%d", i))
+		s := fmt.Sprintf("%x", h.Sum(nil))
+		//t.Log(s)
+		tests = append(tests, struct {
+			id        int
+			name      string
+			args      args
+			wantTitle string
+		}{i, fmt.Sprintf("normal %d", i), args{fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s))}, fmt.Sprintf("test%s", string(s))})
+		err := markdownUsecase.Create(fmt.Sprintf("test%s", string(s)), fmt.Sprintf("testdata/%s/README.md", string(s)), fmt.Sprintf("http://test%s/test%s", string(s), string(s)))
+		if err != nil {
+			t.Errorf("MarkdownInteractor.Delete() error = got %v, s value = %s\n", err, string(s))
 		}
 
-		args := []string{"", "clean"}
+	}
 
-		//testdataDBの作成
+	app := &cli.Context{
+		App: actions.NewWebClip("webclip.sql"),
+	}
 
-		//clean後に確認
-	*/
+	args2 := []string{"", "clean"}
+
+	//clean後に確認
+	got := extractStdout(t, app, args2)
+
+	t.Log(got)
+
+	mds, err := markdownUsecase.FindAll()
+	if err != nil {
+		t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
+	}
+
+	if (len(mds)) != 0 {
+		t.Errorf("MarkdownInteractor.FindAll() error = %v\n", err)
+	}
 
 }
 
 func TestSearch(t *testing.T) {
+	//bodyとtitleで検索
+	//先にデータベースを作成しておく　リスト
 
+	//検索し、結果を表示する
 }
 
 func TestZip(t *testing.T) {
