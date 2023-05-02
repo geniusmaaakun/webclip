@@ -14,7 +14,8 @@ export const useLoadMarkdown = () => {
   const { markdowns, setMarkdowns } = useMarkdowns();
 
   const loadMarkdown = useCallback(
-    (id: string) => {
+    async (id: string) => {
+      /*  
       const fetchMarkdown = async () => {
         const res = await fetch(`http://localhost:8080/api/markdowns/${id}`);
         const json = await res.json();
@@ -28,9 +29,32 @@ export const useLoadMarkdown = () => {
             return markdown;
           })
         );
+        return json;
       };
-      fetchMarkdown();
-      console.log(markdowns)
+      const md = await fetchMarkdown();
+      //console.log(markdowns)
+      return md;
+      */
+        const res = await api.get(`/api/markdowns/${id}`);
+        const md : Markdown = {
+                id: res.data.id,
+                title: res.data.title,
+                content: res.data.content,
+                path: res.data.path,
+                srcurl: res.data.srcurl,
+                created_at: res.data.created_at,
+        };
+        setMarkdowns(
+            markdowns.map((markdown) => {
+            //idが一致したら、jsonに置き換える
+            if (markdown.id === md.id) {
+                return md;
+            }
+            //idが一致しなかったら、そのまま返す
+            return markdown;
+            })
+        );
+        return md;
     },
     [setMarkdowns]
   );
@@ -40,6 +64,7 @@ export const useLoadMarkdown = () => {
 
 export const useLoadMarkdowns = () => {
   const { markdowns, setMarkdowns } = useMarkdowns();
+  //setMarkdowns(markdowns); が非同期な為、setMarkdowns が完了していない可能性がある。
   let fetchMarkdowns :Markdown[] = []
   //useCallbackで関数をメモ化する
   //useCallbackはReact.memoと併用する。
@@ -105,58 +130,3 @@ export const useLoadMarkdowns = () => {
   return { loadMarkdowns };
 };
 
-
-export const useSearchMarkdowns = () => {
-    // 検索欄への入力値での絞り込み
-    const SearchMarkdown = (value: string) => {
-        const { markdowns, setMarkdowns } = useMarkdowns();
-
-        if (value === "") {
-            return markdowns;
-        }
-        //　match  正規表現にマッチするか？gオプションで配列を返すない場合は、一つだけ
-        const searchKeywords = value
-            .trim()
-            .toLowerCase()
-            .match(/[^\s]+/g);
-        // 検索欄への入力が空の場合は早期return
-        if (searchKeywords === null) {
-            return markdowns; 
-        }
-
-        const serchedPosts = markdowns.filter((data) => {
-            //各valueに対して、入力値と一致するかを判定
-            /*
-            Object.values(post).filter(
-                (item: string) =>
-                item !== undefined &&
-                item !== null &&
-                item.toString().toUpperCase().indexOf(value.toString().toUpperCase()) !== -1
-            ).length > 0
-            */
-
-            //タイトルのみ検索
-            // if (post.title !== undefined && post.title !== null && post.title.toString().toUpperCase().indexOf(value.toString().toUpperCase()) !== -1) {
-            //         return true;
-            // }
-
-            //キーワードを全て含むか
-            return searchKeywords.every((kw) => {
-            if (
-                data.title !== undefined &&
-                data.title !== null &&
-                data.title
-                .toString()
-                .toUpperCase()
-                .indexOf(kw.toString().toUpperCase()) !== -1
-            ) {
-                return true;
-            }
-            return false;
-            });
-        });
-        return serchedPosts;
-    }
-
-    return { SearchMarkdown };
-}

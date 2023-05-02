@@ -3,8 +3,8 @@ import { useMarkdowns } from "../../hooks/providers/useMarkdownsProvider";
 import axios from "axios";
 import { Markdown } from "../../types/api/Markdown";
 import { useLoadMarkdowns } from "../../hooks/markdowns/useMarkdowns";
-import { useSearchMarkdowns } from "../../hooks/markdowns/useMarkdowns";
 
+import { useNavigate } from 'react-router-dom'; //v6
 /*
 interface Markdown {
   title: string;
@@ -21,11 +21,11 @@ export const Search = () => {
   const [data, setData] = useState<Markdown[]>([]);
   const { markdowns, setMarkdowns } = useMarkdowns();
   const { loadMarkdowns } = useLoadMarkdowns();
-  const { SearchMarkdown } = useSearchMarkdowns();
 
   //表示するデータ
   const [resultData, setResultData] = useState<Markdown[]>([]);
 
+  const navigate = useNavigate();
 
   //入力されたら、inputに格納
   const handleChange = (e: React.ChangeEvent<{ value: string }>) => {
@@ -103,6 +103,10 @@ export const Search = () => {
     setResultData(serchedPosts);
   };
 
+  const onClickMarkdown = (id: string) => {
+    navigate(`/markdowns/${id}`);
+  }
+
   return (
     <div>
       <h1>WebClip</h1>
@@ -116,8 +120,8 @@ export const Search = () => {
       <ul>
         {resultData && resultData.map((item, index) => (
           //詳細ページを作成
-          <li key={index}>
-            <a href="">{item.title}</a>
+          <li key={index} onClick={() => onClickMarkdown(item.id)}>
+            {item.title}
           </li> // APIレスポンスに応じて、適切なデータを表示してください
         ))}
       </ul>

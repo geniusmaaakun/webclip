@@ -87,13 +87,13 @@ const MarkdownEditor = () => {
   useEffect(() => {
     //APIを叩く処理
     //取得したデータをvalueに入れる
-    if (markdown) {
-      loadMarkdown(markdown.id);
-      console.log(markdown?.content);
+    async function fetchData() {
+      const md = await loadMarkdown(id!);
+      //console.log(markdown!.content);
+      setMarkdownValue(md.content || "");
     }
 
-    setMarkdownValue(markdown?.content || "");
-
+    fetchData();
   }, [id]);
   
   const [markdownValue, setMarkdownValue] = useState("");
