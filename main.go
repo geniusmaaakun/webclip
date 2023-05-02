@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 	"webclip/src/actions"
 	"webclip/src/server/models"
 )
@@ -16,7 +16,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("main: %v\n", err)
 	}
-	app := actions.NewWebClip(filepath.Join(folderPath, "webclip.sql"))
+	//production
+	//app := actions.NewWebClip(filepath.Join(folderPath, "webclip.sql"))
+
+	//development
+	fmt.Println(folderPath)
+	app := actions.NewWebClip("webclip.sql")
+
 	err = app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)

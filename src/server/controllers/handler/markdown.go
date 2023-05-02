@@ -21,6 +21,8 @@ type MarkdownMemo struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type MarkdownMemos []*MarkdownMemo
+
 func (m *MarkdownMemo) ConvertTo() models.MarkdownMemo {
 	return models.MarkdownMemo{Id: m.Id, Title: m.Title, Path: m.Path, SrcUrl: m.SrcUrl, CreatedAt: m.CreatedAt}
 }

@@ -45,7 +45,7 @@
 // export default MarkdownEditor;
 
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SimpleMde from "react-simplemde-editor";
 import "easymde/dist/easymde.min.css";
 import {marked} from "marked";
@@ -55,6 +55,9 @@ import highlightjs from "highlight.js";
 import "highlight.js/styles/github.css";
 //ハイライトをつけよう
 
+import {useParams} from "react-router-dom"
+import { useLoadMarkdown } from "../../hooks/markdowns/useMarkdowns";
+import { useMarkdowns} from "../../hooks/providers/useMarkdownsProvider";
 
 /**
  ```js
@@ -71,7 +74,28 @@ const MarkdownEditor = () => {
       return highlightjs.highlightAuto(code, [lang]).value;
     },
   });
- 
+
+  //urlからidを取得する
+  const {id} = useParams();
+  const { loadMarkdown } = useLoadMarkdown();
+  const { getMarkdownById } = useMarkdowns();
+  console.log(id);
+  const markdown = getMarkdownById(id!);
+  
+  //idからAPIを叩いて、データを取得する
+  //取得したデータをvalueに入れる
+  useEffect(() => {
+    //APIを叩く処理
+    //取得したデータをvalueに入れる
+    if (markdown) {
+      loadMarkdown(markdown.id);
+      console.log(markdown?.content);
+    }
+
+    setMarkdownValue(markdown?.content || "");
+
+  }, [id]);
+  
   const [markdownValue, setMarkdownValue] = useState("");
  
   const onChange = (value: string) => {
@@ -79,6 +103,9 @@ const MarkdownEditor = () => {
     //保存する処理
   };
  
+  if (!id) {
+    return null;
+  }
   return (
     <div>
       <SimpleMde value={markdownValue} onChange={onChange} />

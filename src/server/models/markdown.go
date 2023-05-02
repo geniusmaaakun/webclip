@@ -12,6 +12,8 @@ type MarkdownMemo struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+type MarkdownMemos []*MarkdownMemo
+
 func NewMarkdownMemo(title, path, srsUrl string) *MarkdownMemo {
 	return &MarkdownMemo{Title: title, Path: path, SrcUrl: srsUrl, CreatedAt: time.Now()}
 }

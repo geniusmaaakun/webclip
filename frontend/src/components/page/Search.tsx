@@ -1,44 +1,58 @@
 import React, { useState, useEffect } from "react";
+import { useMarkdowns } from "../../hooks/providers/useMarkdownsProvider";
 import axios from "axios";
+import { Markdown } from "../../types/api/Markdown";
+import { useLoadMarkdowns } from "../../hooks/markdowns/useMarkdowns";
+import { useSearchMarkdowns } from "../../hooks/markdowns/useMarkdowns";
 
+/*
 interface Markdown {
   title: string;
   content: string;
   path: string;
   srcUrl: string;
 }
+*/
 
 export const Search = () => {
   //文字列を受け取るためのstate
   const [input, setInput] = useState("");
   //マスターデータ
   const [data, setData] = useState<Markdown[]>([]);
+  const { markdowns, setMarkdowns } = useMarkdowns();
+  const { loadMarkdowns } = useLoadMarkdowns();
+  const { SearchMarkdown } = useSearchMarkdowns();
+
   //表示するデータ
   const [resultData, setResultData] = useState<Markdown[]>([]);
+
 
   //入力されたら、inputに格納
   const handleChange = (e: React.ChangeEvent<{ value: string }>) => {
     setInput(e.target.value);
+    // let searchedmd =  SearchMarkdown(e.target.value);
+    // console.log(searchedmd);
+    // setResultData(searchedmd);
+
     search(e.target.value);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await axios("http://localhost:8080/api/markdowns");
-      if (result.data) {
-        console.log(result.data);
-        setData(result.data);
-        setResultData(result.data);
-      }
-    };
-    console.log("fetchData");
-    fetchData();
-  }, []);
+  useEffect(() => {   
+    async function fetchData() {
+      const mds = await loadMarkdowns();
+      console.log(mds);
+      setResultData(mds);
+    }
 
-  // 検索欄への入力値での絞り込み
+    //setResultData(markdowns);
+
+    fetchData();
+  }, [loadMarkdowns]);
+
+    // 検索欄への入力値での絞り込み
   const search = (value: string) => {
     if (value === "") {
-      setResultData(data);
+      setResultData(markdowns);
       return;
     }
     //　match  正規表現にマッチするか？gオプションで配列を返すない場合は、一つだけ
@@ -48,11 +62,11 @@ export const Search = () => {
       .match(/[^\s]+/g);
     // 検索欄への入力が空の場合は早期return
     if (searchKeywords === null) {
-      setResultData(data);
+      setResultData(markdowns);
       return;
     }
 
-    const serchedPosts = data.filter((data) => {
+    const serchedPosts = markdowns.filter((data) => {
       //各valueに対して、入力値と一致するかを判定
       /*
         Object.values(post).filter(
@@ -100,7 +114,7 @@ export const Search = () => {
         placeholder="検索キーワードを入力"
       />
       <ul>
-        {resultData.map((item, index) => (
+        {resultData && resultData.map((item, index) => (
           //詳細ページを作成
           <li key={index}>
             <a href="">{item.title}</a>
