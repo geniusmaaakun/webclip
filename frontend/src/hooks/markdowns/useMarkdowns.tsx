@@ -12,6 +12,7 @@ import { Markdown } from "../../types/api/Markdown";
 
 export const useLoadMarkdown = () => {
   const { markdowns, setMarkdowns } = useMarkdowns();
+  let md: Markdown;
 
   const loadMarkdown = useCallback(
     async (id: string) => {
@@ -35,25 +36,30 @@ export const useLoadMarkdown = () => {
       //console.log(markdowns)
       return md;
       */
-        const res = await api.get(`/api/markdowns/${id}`);
-        const md : Markdown = {
+        await api.get(`/api/markdowns/${id}`).then((res) => {
+            console.log(res.data)
+
+            md = {
                 id: res.data.id,
                 title: res.data.title,
                 content: res.data.content,
                 path: res.data.path,
                 srcurl: res.data.srcurl,
                 created_at: res.data.created_at,
-        };
-        setMarkdowns(
-            markdowns.map((markdown) => {
-            //idが一致したら、jsonに置き換える
-            if (markdown.id === md.id) {
-                return md;
-            }
-            //idが一致しなかったら、そのまま返す
-            return markdown;
-            })
-        );
+            };
+            //アロー関数で、前回のデータを元に新しいデータを更新することで、更新が保証される。
+            setMarkdowns((prevMarkdowns) =>
+                prevMarkdowns.map((markdown) => {
+                //idが一致したら、jsonに置き換える
+                if (markdown.id === md.id) {
+                    return md;
+                }
+                //idが一致しなかったら、そのまま返す
+                return markdown;
+                })
+            );
+        });
+
         return md;
     },
     [setMarkdowns]
@@ -100,7 +106,7 @@ export const useLoadMarkdowns = () => {
     //fetchMarkdowns();
 
     await api.get("/api/markdowns").then((res) => {
-        console.log(res.data)
+        //console.log(res.data)
         let resMarkdowns: Markdown[] = res.data;
 
         /*
@@ -121,8 +127,10 @@ export const useLoadMarkdowns = () => {
             return md ;
         });
         setMarkdowns(fetchMarkdowns);
+        //console.log(markdowns)
     })
-    // console.log("test")
+
+     //console.log("test")
     // console.log(markdowns)
     return fetchMarkdowns;
   }, [setMarkdowns]); //この関数を使ったコンポーネントが再レンダリングされるのを防ぐ

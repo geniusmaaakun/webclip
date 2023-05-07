@@ -58,6 +58,7 @@ import "highlight.js/styles/github.css";
 import {useParams} from "react-router-dom"
 import { useLoadMarkdown } from "../../hooks/markdowns/useMarkdowns";
 import { useMarkdowns} from "../../hooks/providers/useMarkdownsProvider";
+import { Markdown } from "../../../src/types/api/Markdown"
 
 /**
  ```js
@@ -67,7 +68,14 @@ const [test, setTest] = useState();
 sl := 1
 ```
  */
-const MarkdownEditor = () => {
+
+type Props = {
+  markdowns: Markdown[];
+};
+
+const MarkdownEditor = (props: Props) => {
+  const { markdowns } = props;
+
     // ハイライトの設定
   marked.setOptions({
     highlight: (code, lang) => {
@@ -76,27 +84,38 @@ const MarkdownEditor = () => {
   });
 
   //urlからidを取得する
+  const [markdownValue, setMarkdownValue] = useState("");
   const {id} = useParams();
   const { loadMarkdown } = useLoadMarkdown();
+
+  //?
   const { getMarkdownById } = useMarkdowns();
-  console.log(id);
-  const markdown = getMarkdownById(id!);
+  // console.log(id);
+  //const markdown = getMarkdownById(id!);
+  //console.log("mds", markdown)
+
+  // if (markdown) {
+  //   setMarkdownValue(markdown!.content || "");
+  // }
   
   //idからAPIを叩いて、データを取得する
   //取得したデータをvalueに入れる
   useEffect(() => {
     //APIを叩く処理
     //取得したデータをvalueに入れる
+    
     async function fetchData() {
       const md = await loadMarkdown(id!);
+      
       //console.log(markdown!.content);
       setMarkdownValue(md.content || "");
     }
 
-    fetchData();
+    if (id) {
+      fetchData();
+    }
   }, [id]);
   
-  const [markdownValue, setMarkdownValue] = useState("");
  
   const onChange = (value: string) => {
     setMarkdownValue(value);

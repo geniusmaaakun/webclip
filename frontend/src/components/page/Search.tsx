@@ -14,7 +14,11 @@ interface Markdown {
 }
 */
 
-export const Search = () => {
+type Props = {
+  markdowns: Markdown[];
+};
+
+export const Search = (props :Props) => {
   //文字列を受け取るためのstate
   const [input, setInput] = useState("");
   //マスターデータ
@@ -50,6 +54,7 @@ export const Search = () => {
   }, [loadMarkdowns]);
 
     // 検索欄への入力値での絞り込み
+    //React.memo
   const search = (value: string) => {
     if (value === "") {
       setResultData(markdowns);
@@ -107,9 +112,13 @@ export const Search = () => {
     navigate(`/markdowns/${id}`);
   }
 
+  const onClickHome = () => {
+    navigate(`/`);
+  }
+
   return (
     <div>
-      <h1>WebClip</h1>
+      <h1 onClick={onClickHome}>WebClip</h1>
       <input
         type="text"
         value={input}
