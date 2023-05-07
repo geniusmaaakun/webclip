@@ -5,15 +5,16 @@ import { useLoadMarkdowns } from "../../hooks/markdowns/useMarkdowns";
 
 
 export const Home = () => {
-    const { markdowns } = useMarkdowns();
+    //これは不要
+    // const { markdowns } = useMarkdowns();
     
     return (
         <>
             <div className="left">
-                <Search markdowns={markdowns} />
+                <Search />
             </div>
             <div className="right">
-                <MarkdownEditor markdowns={markdowns} />
+                <MarkdownEditor  />
             </div>
         </>
     )

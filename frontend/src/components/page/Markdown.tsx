@@ -73,8 +73,8 @@ type Props = {
   markdowns: Markdown[];
 };
 
-const MarkdownEditor = (props: Props) => {
-  const { markdowns } = props;
+const MarkdownEditor = React.memo(() => {
+  //const { markdowns } = props;
 
     // ハイライトの設定
   marked.setOptions({
@@ -91,8 +91,10 @@ const MarkdownEditor = (props: Props) => {
   //?
   const { getMarkdownById } = useMarkdowns();
   // console.log(id);
-  //const markdown = getMarkdownById(id!);
-  //console.log("mds", markdown)
+
+  //使ってない
+  const markdown = getMarkdownById(id!);
+  console.log("mds", markdown)
 
   // if (markdown) {
   //   setMarkdownValue(markdown!.content || "");
@@ -111,7 +113,8 @@ const MarkdownEditor = (props: Props) => {
       setMarkdownValue(md.content || "");
     }
 
-    if (id) {
+    if (id && markdown?.content === undefined) {
+      console.log("fetch!!");
       fetchData();
     }
   }, [id]);
@@ -119,7 +122,7 @@ const MarkdownEditor = (props: Props) => {
  
   const onChange = (value: string) => {
     setMarkdownValue(value);
-    //保存する処理
+    //ファイルを保存する処理
   };
  
   if (!id) {
@@ -135,7 +138,7 @@ const MarkdownEditor = (props: Props) => {
       ></div>
     </div>
   );
- };
+ });
  
  export default MarkdownEditor;
  

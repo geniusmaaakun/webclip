@@ -18,7 +18,7 @@ type Props = {
   markdowns: Markdown[];
 };
 
-export const Search = (props :Props) => {
+export const Search = React.memo(() => {
   //文字列を受け取るためのstate
   const [input, setInput] = useState("");
   //マスターデータ
@@ -136,4 +136,4 @@ export const Search = (props :Props) => {
       </ul>
     </div>
   );
-};
+});
