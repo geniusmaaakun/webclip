@@ -9,13 +9,16 @@ import { useMarkdowns } from "../providers/useMarkdownsProvider";
 
 import api from "../../services/api";
 import { Markdown } from "../../types/api/Markdown";
+import { AxiosRequestConfig } from "axios";
+
+//プロバイダにまとめる？
 
 export const useLoadMarkdown = () => {
   const { markdowns, setMarkdowns } = useMarkdowns();
   let md: Markdown;
 
   const loadMarkdown = useCallback(
-    async (id: string) => {
+    async (id: string, config?: AxiosRequestConfig) => {
       /*  
       const fetchMarkdown = async () => {
         const res = await fetch(`http://localhost:8080/api/markdowns/${id}`);
@@ -36,7 +39,7 @@ export const useLoadMarkdown = () => {
       //console.log(markdowns)
       return md;
       */
-        await api.get(`/api/markdowns/${id}`).then((res) => {
+        await api.get(`/api/markdowns/${id}`, config).then((res) => {
             console.log(res.data)
 
             md = {
@@ -75,7 +78,7 @@ export const useLoadMarkdowns = () => {
   //useCallbackで関数をメモ化する
   //useCallbackはReact.memoと併用する。
   //React.memoの使用例 https://qiita.com/seira/items/8a170cc950241a8fdb23
-  const loadMarkdowns = useCallback(async() => {
+  const loadMarkdowns = useCallback(async(config?: AxiosRequestConfig) => {
     /*
     //非同期関数 awaitで待機する
     const fetchMarkdowns = async () => {
@@ -105,7 +108,7 @@ export const useLoadMarkdowns = () => {
     */
     //fetchMarkdowns();
 
-    await api.get("/api/markdowns").then((res) => {
+    await api.get("/api/markdowns", config).then((res) => {
         //console.log(res.data)
         let resMarkdowns: Markdown[] = res.data;
 

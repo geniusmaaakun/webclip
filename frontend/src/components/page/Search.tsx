@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useMarkdowns } from "../../hooks/providers/useMarkdownsProvider";
-import axios from "axios";
+import {AxiosRequestConfig} from "axios";
 import { Markdown } from "../../types/api/Markdown";
 import { useLoadMarkdowns } from "../../hooks/markdowns/useMarkdowns";
 
@@ -42,8 +42,13 @@ export const Search = React.memo(() => {
   };
 
   useEffect(() => {   
-    async function fetchData() {
-      const mds = await loadMarkdowns();
+      const controller = new AbortController();
+
+      async function fetchData() {
+      const options: AxiosRequestConfig = {
+        signal: controller.signal, //AbortControllerとAxiosの紐付け
+      };
+      const mds = await loadMarkdowns(options);
       console.log(mds);
       setResultData(mds);
     }
@@ -51,6 +56,11 @@ export const Search = React.memo(() => {
     //setResultData(markdowns);
 
     fetchData();
+
+    return () => {
+      //画面遷移する時(アンマウントする時)に通信を中止する
+      controller.abort();
+    };
   }, [loadMarkdowns]);
 
     // 検索欄への入力値での絞り込み
