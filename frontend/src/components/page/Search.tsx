@@ -14,15 +14,15 @@ interface Markdown {
 }
 */
 
-type Props = {
-  markdowns: Markdown[];
-};
+// type Props = {
+//   markdowns: Markdown[];
+// };
 
 export const Search = React.memo(() => {
   //文字列を受け取るためのstate
   const [input, setInput] = useState("");
   //マスターデータ
-  const [data, setData] = useState<Markdown[]>([]);
+  //const [data, setData] = useState<Markdown[]>([]);
   const { markdowns, setMarkdowns } = useMarkdowns();
   const { loadMarkdowns } = useLoadMarkdowns();
 

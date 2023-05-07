@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axios from 'axios';
 
 const api = axios.create({
     //環境ごとに異なる値が自動的に設定されるP162

@@ -70,9 +70,9 @@ sl := 1
 ```
  */
 
-type Props = {
-  markdowns: Markdown[];
-};
+// type Props = {
+//   markdowns: Markdown[];
+// };
 
 const MarkdownEditor = React.memo(() => {
   //const { markdowns } = props;
@@ -114,7 +114,7 @@ const MarkdownEditor = React.memo(() => {
       const options: AxiosRequestConfig = {
         signal: controller.signal, //AbortControllerとAxiosの紐付け
       };
-      const md = await loadMarkdown(id!);
+      const md = await loadMarkdown(id!, options);
       
       //console.log(markdown!.content);
       setMarkdownValue(md.content || "");
