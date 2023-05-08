@@ -27,7 +27,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!axios)/\"",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -50,5 +50,8 @@
   },
   "devDependencies": {
     "jest-watch-typeahead": "^0.6.5"
+  },
+  "jest": {
+    "transformIgnorePatterns": ["node_modules/(?!axios)/"]
   }
 }

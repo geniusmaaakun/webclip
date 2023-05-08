@@ -1,3 +1,56 @@
+# axios jest
+npm i -D --exact jest-watch-typeahead@0.6.5
+
+```
+package.json
+
+"test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!axios)/\"",
+
+"jest": {
+"transformIgnorePatterns": ["node_modules/(?!axios)/"]
+}
+```
+
+```
+node:internal/process/promises:227
+          triggerUncaughtException(err, true /* fromPromise */);
+          ^
+
+[UnhandledPromiseRejection: This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). The promise rejected with the reason "CanceledError: canceled".] {
+  code: 'ERR_UNHANDLED_REJECTION'
+}
+ChatGPT
+このエラーは、非同期関数内でキャッチされていない例外がスローされたり、処理されていないプロミスが拒否されたりしたために発生します。このエラーは、CanceledErrorがキャッチされていないことを示しています。
+
+エラーがどこで発生しているか特定するには、テストコードを確認し、非同期関数の呼び出しやプロミスのチェーンに対して適切なエラーハンドリングが実装されていることを確認してください。
+
+例えば、async関数内でエラーがスローされる場合、try-catchブロックを使用して例外をキャッチし、適切に処理する必要があります。
+
+javascript
+Copy code
+async function someAsyncFunction() {
+  try {
+    // 非同期処理を行うコード
+  } catch (error) {
+    // エラー処理を行うコード
+  }
+}
+また、プロミスチェーンでエラーが発生する場合は、.catch()を使用してエラーを処理する必要があります。
+
+javascript
+Copy code
+somePromiseFunction()
+  .then(result => {
+    // 成功時の処理
+  })
+  .catch(error => {
+    // エラー処理
+  });
+これらのエラーハンドリング手法を適切に実装して、未処理の例外やプロミスの拒否が発生しないようにしてください。それでもエラーが解決しない場合は、問題が発生しているコードの詳細をお知らせください。
+
+
+```
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

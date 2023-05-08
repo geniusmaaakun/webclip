@@ -61,6 +61,8 @@ export const useLoadMarkdown = () => {
                 return markdown;
                 })
             );
+        }).catch((err) => {
+            console.log(err);
         });
 
         return md;
@@ -131,6 +133,8 @@ export const useLoadMarkdowns = () => {
         });
         setMarkdowns(fetchMarkdowns);
         //console.log(markdowns)
+    }).catch((err) => {
+        console.log(err);
     })
 
      //console.log("test")
