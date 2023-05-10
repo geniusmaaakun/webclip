@@ -23,6 +23,8 @@ export const Search = React.memo(() => {
   const [input, setInput] = useState("");
   //マスターデータ
   //const [data, setData] = useState<Markdown[]>([]);
+
+  //markdownsは最初は空の配列。useEffectでセットされ、再レンダリングされる
   const { markdowns, setMarkdowns } = useMarkdowns();
   const { loadMarkdowns } = useLoadMarkdowns();
 
@@ -41,15 +43,17 @@ export const Search = React.memo(() => {
     search(e.target.value);
   };
 
+  //レンダリング後に実行される
   useEffect(() => {   
-      const controller = new AbortController();
+    const controller = new AbortController();
 
-      async function fetchData() {
+    async function fetchData() {
       const options: AxiosRequestConfig = {
         signal: controller.signal, //AbortControllerとAxiosの紐付け
       };
       const mds = await loadMarkdowns(options);
       console.log(mds);
+      //stateにセットされるのは次回レンダリング時
       setResultData(mds);
     }
 
