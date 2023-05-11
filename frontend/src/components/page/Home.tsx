@@ -1,4 +1,4 @@
-import MarkdownEditor from "./Markdown";
+import { MarkdownEditor } from "./Markdown";
 import { Search } from "./Search";
 
 export const Home = () => {

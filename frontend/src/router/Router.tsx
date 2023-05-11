@@ -3,13 +3,13 @@
 
 import {VFC, useState} from "react"
 import {Route, Routes,  Link} from "react-router-dom"
-import MarkdownEditor from "../components/page/Markdown"
+import { MarkdownEditor } from "../components/page/Markdown"
 import { Search } from "../components/page/Search"
 import { Home } from "../components/page/Home"
 import { MarkdownProvider } from "../hooks/providers/useMarkdownsProvider"
 
 //MemDockの様にする？
-export const Router = () => {
+export const AppRouter = () => {
     return (
         <MarkdownProvider>
             <Routes>

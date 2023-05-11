@@ -54,7 +54,7 @@ export const useLoadMarkdown = () => {
             setMarkdowns((prevMarkdowns) =>
                 prevMarkdowns.map((markdown) => {
                 //idが一致したら、jsonに置き換える
-                if (markdown.id === md.id) {
+                if (markdown.id === String(md.id)) {
                     return md;
                 }
                 //idが一致しなかったら、そのまま返す
@@ -120,6 +120,8 @@ export const useLoadMarkdowns = () => {
             console.log(resMarkdown)
         });
         */
+       console.log(res.data)
+
         fetchMarkdowns = resMarkdowns.map((markdown) => {
             let md : Markdown = {
                 id: markdown.id,

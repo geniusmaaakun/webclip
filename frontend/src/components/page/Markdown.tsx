@@ -74,7 +74,7 @@ sl := 1
 //   markdowns: Markdown[];
 // };
 
-const MarkdownEditor = React.memo(() => {
+export const MarkdownEditor = React.memo(() => {
   //const { markdowns } = props;
 
     // ハイライトの設定
@@ -91,7 +91,7 @@ const MarkdownEditor = React.memo(() => {
 
   //?
   const { getMarkdownById } = useMarkdowns();
-  // console.log(id);
+  console.log(id);
 
   //使ってない
   const markdown = getMarkdownById(id!);
@@ -152,5 +152,4 @@ const MarkdownEditor = React.memo(() => {
   );
  });
  
- export default MarkdownEditor;
  

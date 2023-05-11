@@ -20,7 +20,7 @@ interface Markdown {
 
 export const Search = React.memo(() => {
   //文字列を受け取るためのstate
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState<string>("");
   //マスターデータ
   //const [data, setData] = useState<Markdown[]>([]);
 
