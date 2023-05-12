@@ -31,6 +31,9 @@ func (s *Server) Run() error {
 	//Corsを許可する
 	router.Use(s.enableCORS)
 
+	//router.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("build"))))
+	//router.HandleFunc("/", handler.View).Methods("GET")
+
 	//Reactのhtmlを返す
 	//router.HandleFunc("/api/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
 	router.HandleFunc("/api/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
