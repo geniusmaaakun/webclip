@@ -4,6 +4,8 @@ import { debug } from "console";
 
 //useContextのテスト
 
+//stateが更新されたかを確認
+
 
 describe("Markdown", () => {
 

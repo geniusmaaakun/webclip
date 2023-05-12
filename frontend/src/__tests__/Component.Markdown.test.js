@@ -79,7 +79,8 @@ import { setupServer } from "msw/node";
 import { AppRouter } from "../router/Router";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter, Router, MemoryRouter, Route, Routes } from 'react-router-dom';
-
+import { MarkdownProvider } from "../hooks/providers/useMarkdownsProvider";
+import { Editor } from "../components/parts/Editor";
 
 const handler = [
     rest.get("http://localhost:8080/api/markdowns", (req, res, ctx) => {
@@ -110,17 +111,48 @@ afterEach(() => {
 afterAll(() => server.close());
 /////////
 
+/*
+jest.mockはJestのモック機能を提供する関数で、指定したモジュールの挙動を書き換えるために使用されます。これにより、テスト中にコントロールが難しい外部依存関係や副作用を排除し、テスト対象のコードの挙動をより純粋に検証できます。
 
-describe('<AppRouter />', () => {
+例えば、次のようなコードがあるとします：
+
+jsx
+Copy code
+import externalLibrary from 'external-library';
+
+export function myFunction() {
+  return externalLibrary.someFunction();
+}
+上記のmyFunctionはexternal-libraryに依存しています。external-library.someFunctionの挙動をコントロールできない場合、myFunctionのテストは難しくなるでしょう。
+
+ここでjest.mockを使うと、以下のようにexternal-libraryをモック化し、someFunctionの挙動をテストの中で自由に設定できます：
+
+jsx
+Copy code
+jest.mock('external-library', () => ({
+  someFunction: jest.fn().mockReturnValue('mocked value'),
+}));
+
+import { myFunction } from './myFunction';
+
+it('returns the mocked value', () => {
+  expect(myFunction()).toBe('mocked value');
+});
+このようにjest.mockを使うことで、テスト対象のコードが依存する外部のモジュールをモック化し、その挙動をコントロールすることができます。これによりテストの信頼性と再現性が向上します。
+*/
+jest.mock('react-simplemde-editor', () => (props) => (
+    <textarea data-testid="mock-editor" onChange={(e) => props.onChange(e.target.value)} value={props.value} />
+));
+
+
+describe('<Editor />', () => {
     it('It renders the recipe', async () => {
         render(
-            <MemoryRouter initialEntries={[`/markdowns/1`]}><AppRouter /></MemoryRouter>
+            <Editor id={"1"}/>, { wrapper: MarkdownProvider }
         );
-        //await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
-
-        //await screen.debug();
+        //screen.debug();
         
-        expect(await screen.findByText(/h2/));
+        expect(await screen.findByText(/## h2/));
         
     });
 });

@@ -44,22 +44,12 @@
    
 // export default MarkdownEditor;
 
-
-import React, { useEffect, useState } from "react";
-import SimpleMde from "react-simplemde-editor";
-import "easymde/dist/easymde.min.css";
-import {marked} from "marked";
-//npm install --save @types/dompurifyをしないといけない
-import DOMPurify from "dompurify";
-import highlightjs from "highlight.js";
-import "highlight.js/styles/github.css";
 //ハイライトをつけよう
+import React from "react";
+
+import { Editor } from "../parts/Editor";
 
 import {useParams} from "react-router-dom"
-import { useLoadMarkdown } from "../../hooks/markdowns/useMarkdowns";
-import { useMarkdowns} from "../../hooks/providers/useMarkdownsProvider";
-import { Markdown } from "../../../src/types/api/Markdown"
-import {AxiosRequestConfig} from "axios";
 
 /**
  ```js
@@ -77,77 +67,15 @@ sl := 1
 export const MarkdownEditor = React.memo(() => {
   //const { markdowns } = props;
 
-    // ハイライトの設定
-  marked.setOptions({
-    highlight: (code, lang) => {
-      return highlightjs.highlightAuto(code, [lang]).value;
-    },
-  });
-
   //urlからidを取得する
-  const [markdownValue, setMarkdownValue] = useState("");
   const {id} = useParams();
-  const { loadMarkdown } = useLoadMarkdown();
 
-  //?
-  const { getMarkdownById } = useMarkdowns();
-  console.log(id);
-
-  //使ってない
-  const markdown = getMarkdownById(id!);
-  console.log("mds", markdown)
-
-  // if (markdown) {
-  //   setMarkdownValue(markdown!.content || "");
-  // }
-  
-  //idからAPIを叩いて、データを取得する
-  //取得したデータをvalueに入れる
-  useEffect(() => {
-    //API通信を中断するための処理
-    const controller = new AbortController();
-
-    //APIを叩く処理
-    //取得したデータをvalueに入れる
-    
-    async function fetchData() {
-      const options: AxiosRequestConfig = {
-        signal: controller.signal, //AbortControllerとAxiosの紐付け
-      };
-      const md = await loadMarkdown(id!, options);
-      
-      //console.log(markdown!.content);
-      setMarkdownValue(md.content || "");
-    }
-
-    if (id && markdown?.content === undefined) {
-      console.log("fetch!!");
-      fetchData();
-    }
-
-    return () => {
-      //画面遷移する時(アンマウントする時)に通信を中止する
-      controller.abort();
-    };
-  }, [id]);
-  
- 
-  const onChange = (value: string) => {
-    setMarkdownValue(value);
-    //ファイルを保存する処理
-  };
- 
   if (!id) {
     return null;
   }
   return (
     <div>
-      <SimpleMde value={markdownValue} onChange={onChange} />
-      <div
-        dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(marked(markdownValue)),
-        }}
-      ></div>
+      <Editor id={id}/>
     </div>
   );
  });
