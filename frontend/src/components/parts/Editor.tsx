@@ -76,12 +76,12 @@ export const Editor = (props: Props) => {
   };
   return (
     <>
-      <SimpleMde value={markdownValue} onChange={onChange} />
-      <div
-        dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(marked(markdownValue)),
-        }}
-      ></div>
+        <SimpleMde value={markdownValue} onChange={onChange} />
+        <div className="markdown-body"
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(marked(markdownValue)),
+          }}
+        ></div>
     </>
   );
 };
