@@ -56,7 +56,7 @@ export const Editor = (props: Props) => {
       const md = await loadMarkdown(id!, options);
 
       //console.log(markdown!.content);
-      setMarkdownValue(md.content || "");
+      setMarkdownValue(md ? md.content : "");
     }
 
     if (id && markdown?.content === undefined) {

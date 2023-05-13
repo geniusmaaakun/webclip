@@ -28,16 +28,21 @@ func NewServer(host, port string, db *sql.DB) *Server {
 //gorilla/muxを使ってルーティングを設定する
 func (s *Server) Run() error {
 	router := mux.NewRouter().StrictSlash(true) //末尾/を許可しない
-	//Corsを許可する
-	router.Use(s.enableCORS)
 
-	//router.Handle("/", http.StripPrefix("/", http.FileServer(http.Dir("build"))))
-	//router.HandleFunc("/", handler.View).Methods("GET")
+	//サブルーターを切る
+	ApiRouter := router.PathPrefix("/api").Subrouter()
+
+	//CORSを許可する
+	//react側のAPIアクセスをポート指定不要
+	ApiRouter.Use(s.enableCORS)
+
+	//router.HandleFunc("/api/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
+	ApiRouter.HandleFunc("/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
+	ApiRouter.HandleFunc("/markdowns/{id}", s.MarkdownHandler.GetById).Methods("GET")
 
 	//Reactのhtmlを返す
-	//router.HandleFunc("/api/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
-	router.HandleFunc("/api/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
-	router.HandleFunc("/api/markdowns/{id}", s.MarkdownHandler.GetById).Methods("GET")
+	fs := http.FileServer(http.Dir("./frontend/build"))
+	router.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 
 	err := http.ListenAndServe(s.Host+":"+s.Port, router)
 	return err

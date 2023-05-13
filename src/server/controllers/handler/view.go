@@ -1,11 +1,15 @@
 package handler
 
 import (
+	"html/template"
+	"log"
 	"net/http"
-	"text/template"
 )
 
 func View(w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("./frontend/public/index.html"))
-	t.Execute(w, nil)
+	t := template.Must(template.ParseFiles("./frontend/build/index.html"))
+	err := t.Execute(w, nil)
+	if err != nil {
+		log.Println(err)
+	}
 }
