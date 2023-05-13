@@ -1,7 +1,8 @@
 NAME = webclip
 
 # ディレクトリを作成し、DBを作成する。ルートに作成
-goinstall: 
+install: 
+	cd frontend && npm run build
 	go install
 
 
@@ -23,5 +24,6 @@ test:
 	go test ./src/server/models/rdb -v
 	go test ./src/server/usecases -v
 	go test ./src/server/controllers/handler -v
+	cd frontend && npm test
 
-.PHONY: install test
+.PHONY: install test build
