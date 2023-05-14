@@ -144,7 +144,7 @@ export const Search = React.memo(() => {
         {resultData && resultData.map((item, index) => (
           //詳細ページを作成
           <li key={index} onClick={() => onClickMarkdown(item.id)}>
-            {item.title}
+            {item.title} {item.path} {item.created_at.toString()}
           </li> // APIレスポンスに応じて、適切なデータを表示してください
         ))}
       </ul>
