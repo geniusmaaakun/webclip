@@ -10,6 +10,7 @@ import "highlight.js/styles/github.css";
 import { useLoadMarkdown } from "../../hooks/markdowns/useMarkdowns";
 import { useMarkdowns } from "../../hooks/providers/useMarkdownsProvider";
 import { AxiosRequestConfig } from "axios";
+import "./editor.css"
 
 interface Props {
   id: string;
@@ -74,14 +75,17 @@ export const Editor = (props: Props) => {
     setMarkdownValue(value);
     //ファイルを保存する処理
   };
+
   return (
-    <>
-        <SimpleMde value={markdownValue} onChange={onChange} />
+    <div className="markdown-area">
+        <div className="markdown-editor">
+          <SimpleMde value={markdownValue} onChange={onChange} />
+        </div>
         <div className="markdown-body"
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(marked(markdownValue)),
           }}
         ></div>
-    </>
+    </div>
   );
 };
