@@ -11,6 +11,7 @@ import { useLoadMarkdown } from "../../hooks/markdowns/useMarkdowns";
 import { useMarkdowns } from "../../hooks/providers/useMarkdownsProvider";
 import { AxiosRequestConfig } from "axios";
 import "./editor.css"
+//import { SaveButton } from "./SaveButton";
 
 interface Props {
   id: string;
@@ -77,6 +78,7 @@ export const Editor = (props: Props) => {
   };
 
   return (
+    <>
     <div className="markdown-area">
         <div className="markdown-editor">
           <SimpleMde value={markdownValue} onChange={onChange} />
@@ -87,5 +89,6 @@ export const Editor = (props: Props) => {
           }}
         ></div>
     </div>
+    </>
   );
 };
