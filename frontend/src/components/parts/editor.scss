@@ -1,0 +1,24 @@
+.markdown-area {
+    display: flex;
+}
+
+.markdown-editor {
+    width: 50% !important;
+}
+
+.CodeMirror {
+    text-align: start;
+    height: 100vh !important;
+}
+
+.markdown-body {
+    text-align: start;
+    width: 50% !important;
+    height: 100vh !important;
+    overflow: auto;
+}
+
+.markdown-body img {
+    width: 100%;;
+}
+  
