@@ -44,6 +44,11 @@ golangのサーバーはそのまま使う。（内部サーバー） + github a
 
 別のリポジトリとして構築
 
+　動画保存　url?
+　flutter github連携
+	リポジトリを作成　設定
+	リポジトリに追加、取得、表示
+
 # webclipをP2Pで共有
 
 
@@ -109,6 +114,19 @@ imgタグを見つけたらダウンロード、置き換え
     ```
 
 # テスト
+E2Eテスト　月〜金
+	Cypress. 　　調べる
+
+# 通知機能　
+
+https://qiita.com/ryotanny/items/670b3aba7ea8e57eb776
+
+webpush 
+https://blog.capilano-fw.com/?p=11536
+
+# 状態管理　Zustand. 
+
+
 
 # P2Pで共有
 
