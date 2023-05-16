@@ -35,6 +35,15 @@ webclip zip -b "{body}"
 webclip zip -t "{title}" -b "{body}"
 ```
 
+
+# Flutter 設計
+golangのサーバーはそのまま使う。（内部サーバー） + github api
+もしくはwebclipのサーバーを外部サーバーとして運用 一人5GBまで無料 aws
+外部サーバーとして運用するだけなら、UIだけでOK
+サーチバーとエディターのみ 実装する
+
+別のリポジトリとして構築
+
 # webclipをP2Pで共有
 
 
@@ -138,6 +147,14 @@ repo
 # React
 やりたいこと
 テスト、Ts
+
+# UI
+	左にリストと検索バー、右にマークダウン
+	保存機能　reactで保存ボタンを作る。保存ボタンを押したら、APIに送信
+    2 詳細ページ　	マークダウンエディタ実装
+　　		ハイライトは無視、エンターで保存。表示だけでも良いかも
+    そこそこかっこいいUI探す
+    ChacraUI
 
 ## プロジェクトの作成
 npx create-react-app frontend --template typescript
