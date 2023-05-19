@@ -1,11 +1,13 @@
 # WebClip
-* https://kic-yuuki.hatenablog.com/entry/2019/06/29/173256
-* https://shields.io/
+
+![ソースコード言語](https://img.shields.io/github/languages/top/geniusmaaakun/webclip)
+
+![ソースコード数](https://img.shields.io/github/languages/count/geniusmaaakun/webclip)
 
 ![ソースコードサイズ](https://img.shields.io/github/languages/code-size/geniusmaaakun/webclip)
 
 
-![test](./frontend/public/favicon.ico)
+![logo](./frontend/public/favicon.ico)
 
 
 ## Overview
@@ -14,7 +16,7 @@ By specifying the option, image files are also downloaded.
 
 コマンドラインでWebサイトからHTMLファイルを取得し、マークダウン形式に変換して、指定したフォルダに保存します。
 オプションを指定することで、画像ファイルもダウンロードします。
-
+特定のURLの資料などを、ローカルに保存しておきたいときに使います。
 
 ## Requirement
 - MacOS
@@ -38,8 +40,18 @@ make install
 * -save: データベースに保存します
 * -d: 対象ページの画像ファイルも保存します
 
+```
+// ファイルを変換して保存します
+webclip -u "{URL}" -o "{OUTPUT_DIR}"
+
+// ファイルを変換して保存し、データベースに保存します
+webclip -u "{URL}" -o "{OUTPUT_DIR}" -save
+
+// ファイルを変換して保存し、データベースに保存し、対象ページの画像ファイルも保存します
+webclip -u "{URL}" -o "{OUTPUT_DIR}" -save -d
+```
+
 ###  サブコマンド一覧
-3
 
 * search: Search the database for files that match the conditions from the saved files. Only if --save is specified
 * search: 保存したファイルから条件に合うファイルをデータベースから探します。--save を指定した場合に限ります
@@ -71,23 +83,27 @@ webclip zip -t "{title}" -b "{body}"
 
 
 
-## Features
+## Features and Description
 
-- clean architecture
+- 資料のコピーを手動でコピペするを自動化するために作成しました。
+コマンドラインで実行することで、指定したURLのHTMLファイルを取得し、マークダウン形式に変換して、指定したフォルダに保存します。
 
-- react + golang
+- clean architecture \
+クリーンアーキテクチャの練習用に作成しました。
 
+- react + golang \
+reactとgolangを使ってみたかったので、フロントエンドにreactを採用しました。
 
-
-4
-詳しい仕様について、基本的に箇条書きで紹介しています。
-Usageで紹介しなかった詳しい使い方も書いています。
-箇条書きで書きづらい場合や、長くなりそうな場合には、「Features」ではなく「Description」に変更したほうが個人的にはピンときます。
 
 ## Reference
-5
-参考URLを書きます。
 
+- README書き方
+* https://qiita.com/legitwhiz/items/bb34ef20ba23336e0c87
+* https://qiita.com/Kotabrog/items/fb328b72ac94137897af#requirement
+
+- バッジ
+* https://kic-yuuki.hatenablog.com/entry/2019/06/29/173256
+* https://shields.io/
 
 
 ## Author
