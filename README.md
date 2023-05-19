@@ -5,7 +5,7 @@
 ![ソースコードサイズ](https://img.shields.io/github/languages/code-size/geniusmaaakun/webclip)
 
 
-![test](./frontend/build/static/favicon.ico)
+![test](./frontend/public/favicon.ico)
 
 
 ## Overview
