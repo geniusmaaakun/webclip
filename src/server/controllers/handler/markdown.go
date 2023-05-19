@@ -145,3 +145,15 @@ func (h *MarkdownHandler) List(w http.ResponseWriter, r *http.Request) {
 func (h *MarkdownHandler) ListByTitle(w http.ResponseWriter, r *http.Request) {
 
 }
+
+//save
+func (h *MarkdownHandler) UpdateContent(w http.ResponseWriter, r *http.Request) {
+	//jsonを受け取る
+
+	//fileを開く
+
+	//fileに書き込む
+
+	//jsonで返す
+
+}

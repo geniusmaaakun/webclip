@@ -1,5 +1,127 @@
 # 今後の取り組み
 
+* reactから保存機能
+    保存ボタン設置、APIに投げる
+
+* CICD
+    github actions
+
+* UI
+    かっこいいUIに整える
+
+* FlutterApp
+    markdown
+    chatgptに投げる
+    保存したデータを表示する
+
+```
+    import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:webclip/models/markdown.dart';
+import 'package:webclip/providers/markdown_provider.dart';
+import 'package:webclip/screens/markdown_screen.dart';
+
+class SearchScreen extends HookConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final markdowns = ref.watch(markdownsProvider);
+
+    final inputController = useTextEditingController();
+    final resultData = useState<List<Markdown>>([]);
+
+    final navigate = useNavigator();
+
+    useEffect(() {
+      ref.listen<AsyncValue<List<Markdown>>>(markdownsProvider, (state) {
+        state.when(
+          data: (data) {
+            resultData.value = data;
+          },
+          loading: () {},
+          error: (error, stackTrace) {},
+        );
+      });
+      ref.read(markdownsProvider.notifier).loadMarkdowns();
+    }, []);
+
+    void search(String value) {
+      if (value.isEmpty) {
+        resultData.value = markdowns.data?.value ?? [];
+        return;
+      }
+
+      final searchKeywords = value.trim().toLowerCase().split(RegExp(r'\s+'));
+
+      if (searchKeywords.isEmpty) {
+        resultData.value = markdowns.data?.value ?? [];
+        return;
+      }
+
+      final serchedPosts = markdowns.data?.value
+          ?.where((data) =>
+              searchKeywords.every((kw) =>
+                  data.title
+                      .toString()
+                      .toUpperCase()
+                      .contains(kw.toUpperCase())))
+          .toList() ??
+          [];
+
+      resultData.value = serchedPosts;
+    }
+
+    void onClickMarkdown(String id) {
+      navigate.push(MaterialPageRoute(builder: (_) => MarkdownScreen(id: id)));
+    }
+
+    void onClickHome() {
+      navigate.pop();
+    }
+
+    return Scaffold(
+      body: Column(
+        children: [
+          GestureDetector(
+            onTap: onClickHome,
+            child: Text('WebClip', style: Theme.of(context).textTheme.headline4),
+          ),
+          TextField(
+            controller: inputController,
+            onChanged: (value) => search(value),
+            decoration: InputDecoration(hintText: '検索キーワードを入力'),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: resultData.value.length,
+              itemBuilder: (BuildContext context, int index) {
+                final item = resultData.value[index];
+                return GestureDetector(
+                  onTap: () => onClickMarkdown(item.id),
+                  child: ListTile(
+                    title: Text(item.title ?? ''),
+                    subtitle: Text(item.path ?? ''),
+                    trailing: Text(item.createdAt?.toString() ?? ''),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+* テスト
+    E2Eテスト
+    ユニットテスト
+
+* カスタムエラー
+    エラーをカスタムする
+
+
 # Flutter 設計
 golangのサーバーはそのまま使う。（内部サーバー） + github api
 もしくはwebclipのサーバーを外部サーバーとして運用 一人5GBまで無料 aws
@@ -80,6 +202,7 @@ imgタグを見つけたらダウンロード、置き換え
 # テスト
 E2Eテスト　月〜金
 	Cypress. 　　調べる
+CI/CD. 土日. GitHub actions
 
 # 通知機能　
 
