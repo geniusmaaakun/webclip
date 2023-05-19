@@ -1,5 +1,7 @@
 # 今後の取り組み
 
+* json形式ファイルを読み込み、一括ダウンロード
+
 * reactから保存機能
     保存ボタン設置、APIに投げる
 
@@ -13,6 +15,7 @@
     markdown
     chatgptに投げる
     保存したデータを表示する
+    riverpodで状態管理
 
 ```
     import 'package:flutter/material.dart';
