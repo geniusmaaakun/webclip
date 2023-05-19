@@ -1,6 +1,9 @@
 # WebClip
+* https://kic-yuuki.hatenablog.com/entry/2019/06/29/173256
+* https://shields.io/
 
-bachi
+![ソースコードサイズ](https://img.shields.io/github/languages/code-size/geniusmaaakun/webclip)
+
 
 ![test](./frontend/build/static/favicon.ico)
 
@@ -14,15 +17,14 @@ By specifying the option, image files are also downloaded.
 
 
 ## Requirement
-環境や、必要なライブラリなどについて言及しています。
-……とはいっても、場合によっては動作確認をした環境だけ載せているという感じで、必ずしも必要としてない条件も載せてしまっています。
-例えば以下のように示しています。
-必要があればバージョンなども載せています。
+- MacOS
+- golang: 1.19
+- react 17.0.2
 
-- macOS
-- clang
-- Docker 19.03.6
-
+## install
+```
+make install
+```
 
 ## Usage
 ### コマンドオプション一覧
@@ -37,6 +39,7 @@ By specifying the option, image files are also downloaded.
 * -d: 対象ページの画像ファイルも保存します
 
 ###  サブコマンド一覧
+3
 
 * search: Search the database for files that match the conditions from the saved files. Only if --save is specified
 * search: 保存したファイルから条件に合うファイルをデータベースから探します。--save を指定した場合に限ります
@@ -69,11 +72,20 @@ webclip zip -t "{title}" -b "{body}"
 
 
 ## Features
+
+- clean architecture
+
+- react + golang
+
+
+
+4
 詳しい仕様について、基本的に箇条書きで紹介しています。
 Usageで紹介しなかった詳しい使い方も書いています。
 箇条書きで書きづらい場合や、長くなりそうな場合には、「Features」ではなく「Description」に変更したほうが個人的にはピンときます。
 
 ## Reference
+5
 参考URLを書きます。
 
 
@@ -84,5 +96,5 @@ Usageで紹介しなかった詳しい使い方も書いています。
 
 ## Licence
 
-[MIT](https://......)
+[MIT](https://opensource.org/license/mit/)
 
