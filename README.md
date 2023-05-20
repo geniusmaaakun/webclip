@@ -18,6 +18,7 @@
 ## Overview
 Get HTML files from a website on the command line, convert them to markdown format, and save them in a specified folder.
 By specifying the option, image files are also downloaded.
+It is used when you want to save the material of a specific URL locally.
 
 
 ## Requirement
@@ -38,13 +39,13 @@ make install
 * -d: also save the image file of the target page
 
 ```
-// convert the file and save
+// Converts the HTML of the target URL to markdown and saves it locally in the specified directory
 webclip -u "{URL}" -o "{OUTPUT_DIR}"
 
-// Convert the file, save it, and save it to the database
+// By adding --save, you can save it to the database and list it with the server command described later.
 webclip -u "{URL}" -o "{OUTPUT_DIR}" -save
 
-// Convert and save the file, save it to the database, and also save the image file of the target page
+// It also downloads images in HTML
 webclip -u "{URL}" -o "{OUTPUT_DIR}" -save -d
 ```
 
@@ -56,7 +57,7 @@ webclip search -b "{body}"
 webclip search -t "{title}"
 ```
 
-* server: Display the list page of saved files. Simple as it is a command line tool
+* server: Display the list page of saved files. Simple as it is a command line tool. http://localhost:8080
 ```
 webclip server
 ```
