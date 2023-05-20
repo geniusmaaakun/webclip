@@ -23,8 +23,8 @@ It is used when you want to save the material of a specific URL locally.
 
 ## Requirement
 - MacOS, Windows, Linux
-- golang: 1.19
-- react 17.0.2
+- golang: 1.18~
+- react 18
 
 ## install
 ```
