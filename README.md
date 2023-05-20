@@ -21,7 +21,7 @@ By specifying the option, image files are also downloaded.
 
 
 ## Requirement
-- MacOS
+- MacOS, Windows, Linux
 - golang: 1.19
 - react 17.0.2
 
