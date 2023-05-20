@@ -4,7 +4,7 @@
 windows, linuxにも対応したい
 
 * json形式ファイルを読み込み、一括ダウンロード
-
+webclip -f {json file}
 * reactから保存機能
     保存ボタン設置、APIに投げる
 
