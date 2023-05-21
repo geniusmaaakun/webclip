@@ -89,17 +89,6 @@ I made it for clean architecture practice.
 I wanted to try using react and golang, so I adopted react for the front end.
 
 
-## Reference
-
-- README書き方
-* https://qiita.com/legitwhiz/items/bb34ef20ba23336e0c87
-* https://qiita.com/Kotabrog/items/fb328b72ac94137897af#requirement
-
-- バッジ
-* https://kic-yuuki.hatenablog.com/entry/2019/06/29/173256
-* https://shields.io/
-
-
 ## Author
 
 [twitter@geniusmaaakun](https://twitter.com/geniusmaaakun)
