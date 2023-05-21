@@ -17,7 +17,7 @@ func Server(dbPath string) func(*cli.Context) error {
 		//clear ファイルパスが存在しない場合削除
 		//list ファイルパスを表示
 		fmt.Println("Start Web Server")
-		fmt.Println("ip: localhost:8080")
+		fmt.Println("Running on local URL: http://localhost:8080")
 		//create db
 		db, err := models.NewDB(dbPath)
 		if err != nil {
