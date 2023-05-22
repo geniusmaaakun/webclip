@@ -3,9 +3,7 @@
 # WebClip
 
 ![ソースコード言語](https://img.shields.io/github/languages/top/geniusmaaakun/webclip)
-
 ![ソースコード数](https://img.shields.io/github/languages/count/geniusmaaakun/webclip)
-
 ![ソースコードサイズ](https://img.shields.io/github/languages/code-size/geniusmaaakun/webclip)
 
 
