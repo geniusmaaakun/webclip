@@ -1,5 +1,26 @@
 # 今後の取り組み
 
+* proglessbar
+    プログレスバーを表示する
+https://github.com/geniusmaaakun/kiso_blog_windows/tree/master/traning/202304/go_Progress
+
+
+* github releasesでバージョン管理
+https://qiita.com/todogzm/items/db9f5f2cedf976379f84
+
+* readme　参考
+https://github.com/Code-Hex/pget
+
+* バイナリを配布する
+apt
+brewなど
+プロジェクトに含める？
+https://reiki4040.hatenablog.com/entry/2014/10/19/124447
+https://tokyodebian-team.pages.debian.net/pdf2014/debianmeetingresume201404-presentation-mkouhei.pdf
+
+
+* distをembedする
+
 * コメントアウト、本番用に整えたら公開
 windows, linuxにも対応したい
 

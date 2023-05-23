@@ -11,6 +11,7 @@ install:
 #	cp $(NAME) /usr/local/bin/$(NAME)
 
 build:
+	cd frontend && npm run build
 	go build -o $(NAME) main.go
 
 #クロスコンパイル

@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"database/sql"
+	"embed"
 	"net/http"
 	"webclip/src/server/controllers/handler"
 	"webclip/src/server/models/rdb"
@@ -9,6 +10,9 @@ import (
 
 	"github.com/gorilla/mux"
 )
+
+//go:embed build/*
+var viewFiles embed.FS
 
 type Server struct {
 	Host string
@@ -41,8 +45,17 @@ func (s *Server) Run() error {
 	ApiRouter.HandleFunc("/markdowns/{id}", s.MarkdownHandler.GetById).Methods("GET")
 
 	//Reactのhtmlを返す
-	fs := http.FileServer(http.Dir("./frontend/build"))
-	router.PathPrefix("/").Handler(http.StripPrefix("/", fs))
+	// fs := http.FileServer(http.Dir("./frontend/build"))
+	// fs := http.FileServer(http.Dir("./src/server/controllers/build"))
+	// router.PathPrefix("/").Handler(http.StripPrefix("/", fs))
+	// file, _ := viewFiles.ReadFile("build/index.html")
+	// fmt.Println(string(file))
+	fs := http.FileServer(http.FS(viewFiles))
+	router.Handle("/build/", http.StripPrefix("/build/", fs))
+	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		file, _ := viewFiles.ReadFile("build/index.html")
+		w.Write(file)
+	})
 
 	err := http.ListenAndServe(s.Host+":"+s.Port, router)
 	return err
