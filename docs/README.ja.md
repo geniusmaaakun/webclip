@@ -89,13 +89,18 @@ reactとgolangを使ってみたかったので、フロントエンドにreact�
 
 ## Reference
 
-- README書き方
+- how to write README 
 * https://qiita.com/legitwhiz/items/bb34ef20ba23336e0c87
 * https://qiita.com/Kotabrog/items/fb328b72ac94137897af#requirement
 
-- バッジ
+- github shields
 * https://kic-yuuki.hatenablog.com/entry/2019/06/29/173256
 * https://shields.io/
+
+* How to Embed React App into Go Binary
+https://medium.com/@pavelfokin/how-to-embed-react-app-into-go-binary-12905d5963f0
+
+https://www.smartinary.com/blog/how-to-embed-a-react-app-in-a-go-binary/
 
 
 ## Author

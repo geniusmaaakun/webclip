@@ -3,6 +3,7 @@ package controllers
 import (
 	"database/sql"
 	"embed"
+	"io/fs"
 	"net/http"
 	"webclip/src/server/controllers/handler"
 	"webclip/src/server/models/rdb"
@@ -46,10 +47,10 @@ func (s *Server) Run() error {
 
 	//Reactのhtmlを返す
 	// fs := http.FileServer(http.Dir("./frontend/build"))
-	// fs := http.FileServer(http.Dir("./src/server/controllers/build"))
 	// router.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 	// file, _ := viewFiles.ReadFile("build/index.html")
 	// fmt.Println(string(file))
+<<<<<<< HEAD
 	fs := http.FileServer(http.FS(viewFiles))
 	router.Handle("/build/", http.StripPrefix("/build/", fs))
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -62,5 +63,18 @@ func (s *Server) Run() error {
 	})
 
 	err := http.ListenAndServe(s.Host+":"+s.Port, router)
+=======
+	// fs := http.FileServer(http.FS(viewFiles))
+	// router.Handle("/", http.StripPrefix("/build/", fs))
+	//router.PathPrefix("/").Handler(http.StripPrefix("/", fs))
+
+	dist, err := fs.Sub(viewFiles, "build")
+	if err != nil {
+		return err
+	}
+	router.PathPrefix("/").Handler(http.FileServer(http.FS(dist)))
+
+	err = http.ListenAndServe(s.Host+":"+s.Port, router)
+>>>>>>> develop
 	return err
 }
