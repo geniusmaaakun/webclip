@@ -86,6 +86,46 @@ I made it for clean architecture practice.
 I wanted to try using react and golang, so I adopted react for the front end.
 
 
+## Reference
+
+- how to write README 
+    * https://qiita.com/legitwhiz/items/bb34ef20ba23336e0c87
+    * https://qiita.com/Kotabrog/items/fb328b72ac94137897af#requirement
+
+- github shields
+    * https://kic-yuuki.hatenablog.com/entry/2019/06/29/173256
+    * https://shields.io/
+
+- How to Embed React App into Go Binary
+    * https://medium.com/@pavelfokin/how-to-embed-react-app-into-go-binary-12905d5963f0
+
+    * https://www.smartinary.com/blog/how-to-embed-a-react-app-in-a-go-binary/
+
+- sass
+    * https://book.scss.jp/code/c2/04.html
+
+- eslint prettier
+    * https://zenn.dev/thiragi/scraps/8e988668dbc860
+
+- How to solve "It is not reflected even if you update the value of useState!"
+    * https://zenn.dev/syu/articles/3c4aa813b57b8c
+    * https://blanktar.jp/blog/2020/06/react-why-state-not-updated
+    * https://blanktar.jp/blog/2020/06/react-why-state-not-updated
+
+- React AbortController 
+    * https://lightbulbcat.hatenablog.com/entry/2019/08/06/040939
+
+- golang error handling
+    * https://zenn.dev/nobonobo/articles/a7f41596220a1b
+
+- Change build path in create-react-app
+    * https://qiita.com/yakimeron/items/7a4f8d9e70a4a2b1b96b
+    * https://github.com/facebook/create-react-app/issues/1354#issuecomment-299956790
+
+- react markdown
+    * https://zenn.dev/rinka/articles/b260e200cb5258
+    * https://harkerhack.com/react-markdown-editor/
+
 ## Author
 
 [twitter@geniusmaaakun](https://twitter.com/geniusmaaakun)
