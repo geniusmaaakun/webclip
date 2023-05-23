@@ -11,7 +11,7 @@ import { useLoadMarkdown } from "../../hooks/markdowns/useMarkdowns";
 import { useMarkdowns } from "../../hooks/providers/useMarkdownsProvider";
 import { AxiosRequestConfig } from "axios";
 import "./editor.css"
-//import { SaveButton } from "./SaveButton";
+import { SaveButton } from "./SaveButton";
 
 interface Props {
   id: string;
@@ -81,6 +81,7 @@ export const Editor = (props: Props) => {
     <>
     <div className="markdown-area">
         <div className="markdown-editor">
+          <SaveButton />
           <SimpleMde value={markdownValue} onChange={onChange} />
         </div>
         <div className="markdown-body"
