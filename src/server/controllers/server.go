@@ -50,20 +50,6 @@ func (s *Server) Run() error {
 	// router.PathPrefix("/").Handler(http.StripPrefix("/", fs))
 	// file, _ := viewFiles.ReadFile("build/index.html")
 	// fmt.Println(string(file))
-<<<<<<< HEAD
-	fs := http.FileServer(http.FS(viewFiles))
-	router.Handle("/build/", http.StripPrefix("/build/", fs))
-	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		file, err := viewFiles.ReadFile("build/index.html")
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Write(file)
-	})
-
-	err := http.ListenAndServe(s.Host+":"+s.Port, router)
-=======
 	// fs := http.FileServer(http.FS(viewFiles))
 	// router.Handle("/", http.StripPrefix("/build/", fs))
 	//router.PathPrefix("/").Handler(http.StripPrefix("/", fs))
@@ -75,6 +61,5 @@ func (s *Server) Run() error {
 	router.PathPrefix("/").Handler(http.FileServer(http.FS(dist)))
 
 	err = http.ListenAndServe(s.Host+":"+s.Port, router)
->>>>>>> develop
 	return err
 }
