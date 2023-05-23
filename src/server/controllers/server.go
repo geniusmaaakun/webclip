@@ -53,7 +53,11 @@ func (s *Server) Run() error {
 	fs := http.FileServer(http.FS(viewFiles))
 	router.Handle("/build/", http.StripPrefix("/build/", fs))
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		file, _ := viewFiles.ReadFile("build/index.html")
+		file, err := viewFiles.ReadFile("build/index.html")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		w.Write(file)
 	})
 
