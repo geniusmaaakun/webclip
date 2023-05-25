@@ -18,8 +18,13 @@ brewなど
 https://reiki4040.hatenablog.com/entry/2014/10/19/124447
 https://tokyodebian-team.pages.debian.net/pdf2014/debianmeetingresume201404-presentation-mkouhei.pdf
 
+* gpt要約させて保存
 
-* distをembedする
+* DBパスを表示するコマンド。サイズも
+
+* DBを削除するコマンドや表示するコマンド
+webclip db delete
+webclip db show
 
 * コメントアウト、本番用に整えたら公開
 windows, linuxにも対応したい
