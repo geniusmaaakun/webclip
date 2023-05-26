@@ -1,5 +1,20 @@
 # 今後の取り組み
 
+* awsへ保存？　収益化できるのか？
+		terraform
+		k8s
+    flutterでメモアプリにダウンロード機能を付ける。保存容量を課金
+
+* githubと連携してpushできる flutter
+
+* ocr機能
+
+* カスタムエラー
+
+* モック、golden　水
+
+* rdb, usecase, …インスタンスを返すようにする？
+
 * proglessbar
     プログレスバーを表示する
 https://github.com/geniusmaaakun/kiso_blog_windows/tree/master/traning/202304/go_Progress
