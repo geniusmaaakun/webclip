@@ -44,6 +44,7 @@ func (s *Server) Run() error {
 	//router.HandleFunc("/api/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
 	ApiRouter.HandleFunc("/markdowns", s.MarkdownHandler.ListAll).Methods("GET")
 	ApiRouter.HandleFunc("/markdowns/{id}", s.MarkdownHandler.GetById).Methods("GET")
+	ApiRouter.HandleFunc("/markdowns/{id}", s.MarkdownHandler.UpdateContent)
 
 	//Reactのhtmlを返す
 	// fs := http.FileServer(http.Dir("./frontend/build"))

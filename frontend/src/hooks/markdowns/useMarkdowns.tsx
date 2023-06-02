@@ -147,3 +147,20 @@ export const useLoadMarkdowns = () => {
   return { loadMarkdowns };
 };
 
+
+//markdownの更新
+export const useUpdateMarkdown = () => {
+    const { markdowns, setMarkdowns } = useMarkdowns();
+
+    const updateMarkdown = useCallback(async(id :string, content: string,  config?: AxiosRequestConfig) => {
+      const payload = {content: content};
+      console.log(content);
+      
+      api.patch(`/api/markdowns/${id}`, payload, config).then((res) => {
+        console.log(res);
+      }).catch((err) => {
+        console.log(err);
+      })
+    }, [setMarkdowns]);
+  return { updateMarkdown }   
+};

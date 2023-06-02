@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -148,12 +149,49 @@ func (h *MarkdownHandler) ListByTitle(w http.ResponseWriter, r *http.Request) {
 
 //save
 func (h *MarkdownHandler) UpdateContent(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	idStr := vars["id"]
+	md, err := h.MarkdownInteractor.FindById(idStr)
+	if err != nil {
+		//独自エラーを返す
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	type data struct {
+		content string
+	}
+
 	//jsonを受け取る
+	mkContent, err := io.ReadAll(r.Body)
+	if err != err {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer r.Body.Close()
+	fmt.Println(string(mkContent))
+	fmt.Println(md)
 
 	//fileを開く
-
+	file, err := os.OpenFile(md.Path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
+	if err != err {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	//fileに書き込む
+	_, err = file.WriteString(string(mkContent))
+	if err != err {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	//jsonで返す
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(mkContent)
+	if err != err {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 }

@@ -81,7 +81,7 @@ export const Editor = (props: Props) => {
     <>
     <div className="markdown-area">
         <div className="markdown-editor">
-          <SaveButton />
+          <SaveButton value={markdownValue} id={id}/>
           <SimpleMde value={markdownValue} onChange={onChange} />
         </div>
         <div className="markdown-body"
