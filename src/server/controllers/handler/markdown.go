@@ -158,10 +158,6 @@ func (h *MarkdownHandler) UpdateContent(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	type data struct {
-		content string
-	}
-
 	//jsonを受け取る
 	mkContent, err := io.ReadAll(r.Body)
 	if err != err {
@@ -170,8 +166,6 @@ func (h *MarkdownHandler) UpdateContent(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	defer r.Body.Close()
-	fmt.Println(string(mkContent))
-	fmt.Println(md)
 
 	//fileを開く
 	file, err := os.OpenFile(md.Path, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
@@ -179,6 +173,7 @@ func (h *MarkdownHandler) UpdateContent(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	//fileに書き込む
 	_, err = file.WriteString(string(mkContent))
 	if err != err {
@@ -193,5 +188,4 @@ func (h *MarkdownHandler) UpdateContent(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
