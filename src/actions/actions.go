@@ -83,6 +83,16 @@ func NewWebClip(dbPath string) *cli.App {
 				},
 				Action: Zip(dbPath),
 			},
+			{
+				Name:   "info",
+				Usage:  "webclip information",
+				Action: Info(),
+			},
+			{
+				Name:   "resetdb",
+				Usage:  "delete db file",
+				Action: ResetDb(),
+			},
 		},
 	}
 

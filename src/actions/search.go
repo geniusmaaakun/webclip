@@ -80,6 +80,17 @@ func Search(dbPath string) func(*cli.Context) error {
 				}
 			}
 		}
+		// -a all flagを設定する?
+		//else {
+		// 	markdowns, err := markdownUsecase.FindAll()
+		// 	if err != nil {
+		// 		log.Fatalf("SearchDatabase: %v\n", err)
+		// 	}
+		// 	fmt.Println("Search Result")
+		// 	for _, m := range markdowns {
+		// 		fmt.Printf("id: %d, title: %s, path: %s, url: %s\n", m.Id, m.Title, m.Path, m.SrcUrl)
+		//	}
+		//}
 
 		return nil
 	}
