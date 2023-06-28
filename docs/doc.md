@@ -38,9 +38,10 @@ https://tokyodebian-team.pages.debian.net/pdf2014/debianmeetingresume201404-pres
 
 * DBパスを表示するコマンド。サイズも
 
-* DBを削除するコマンドや表示するコマンド
-webclip db delete
-webclip db show
+
+* DBを削除するコマンドや表示するコマンド develop 済
+webclip db delete   resetdb.go
+webclip db show    info.go
 
 * コメントアウト、本番用に整えたら公開
 windows, linuxにも対応したい
