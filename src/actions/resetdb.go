@@ -15,7 +15,7 @@ func ResetDb() func(*cli.Context) error {
 		if err != nil {
 			log.Fatalf("main: %v\n", err)
 		}
-		err = os.Remove(folderPath)
+		err = os.RemoveAll(folderPath)
 		if err != nil {
 			log.Fatalf("main: %v\n", err)
 		}

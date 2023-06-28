@@ -19,7 +19,7 @@ func Info() func(*cli.Context) error {
 		fmt.Printf("db path:	%s\n", folderPath)
 		//db size
 		info, err := os.Stat(folderPath)
-		fmt.Printf("db size:	 %d\n", info.Size())
+		fmt.Printf("db size:	 %dbyte\n", info.Size())
 		return nil
 	}
 }
