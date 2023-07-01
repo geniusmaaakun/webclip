@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"webclip/src/server/models"
@@ -15,9 +16,15 @@ func ResetDb() func(*cli.Context) error {
 		if err != nil {
 			log.Fatalf("main: %v\n", err)
 		}
-		err = os.RemoveAll(folderPath)
-		if err != nil {
-			log.Fatalf("main: %v\n", err)
+		fmt.Printf("delete?: yes/no: ")
+		var f string
+		fmt.Scanf("%s", &f)
+		if f == "yes" {
+			err = os.RemoveAll(folderPath)
+			if err != nil {
+				log.Fatalf("main: %v\n", err)
+			}
+			fmt.Printf("deletedb: %s\n", folderPath)
 		}
 		return nil
 	}
