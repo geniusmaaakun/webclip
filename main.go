@@ -20,6 +20,7 @@ func main() {
 	// app := actions.NewWebClip(filepath.Join(folderPath, "webclip.sql"))
 
 	//development
+	//resetdbで削除できるので、これは消しても良いかも
 	app := actions.NewWebClip("webclip.sql")
 
 	err := app.Run(os.Args)
